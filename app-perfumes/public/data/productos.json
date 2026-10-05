@@ -1,0 +1,272 @@
+[
+  {
+    "id": 1,
+    "marca": "Hawas",
+    "modelo": "Malibu",
+    "tipo": "arabe",
+    "genero": "hombre",
+    "precio": 39990,
+    "volumen": "100 ml",
+    "imagenes": "/img/arabe/images.jpg"
+  },
+  {
+    "id": 2,
+    "marca": "Rayhaan",
+    "modelo": "Pacific Aura",
+    "tipo": "arabe",
+    "genero": "hombre",
+    "precio": 63636,
+    "volumen": "100 ml",
+    "imagenes": "/img/arabe/images (1).jpg"
+  },
+  {
+    "id": 3,
+    "marca": "Lattafa",
+    "modelo": "Eclaire",
+    "tipo": "arabe",
+    "genero": "mujer",
+    "precio": 29990,
+    "volumen": "105 ml",
+    "imagenes": "/img/arabe/images (2).jpg"
+  },
+  {
+    "id": 4,
+    "marca": "Afnan",
+    "modelo": "9 AM",
+    "tipo": "arabe",
+    "genero": "hombre",
+    "precio": 69120,
+    "volumen": "100 ml",
+    "imagenes": "/img/arabe/images (3).jpg"
+  },
+  {
+    "id": 5,
+    "marca": "Armaf",
+    "modelo": "Club The Nuit Untold",
+    "tipo": "arabe",
+    "genero": "unisex",
+    "precio": 39990,
+    "volumen": "100 ml",
+    "imagenes": "/img/arabe/images (4).jpg"
+  },
+  {
+    "id": 6,
+    "marca": "Lattafa",
+    "modelo": "Khamrah",
+    "tipo": "arabe",
+    "genero": "unisex",
+    "precio": 69990,
+    "volumen": "100 ml",
+    "imagenes": "/img/arabe/images (5).jpg"
+  },
+  {
+    "id": 7,
+    "marca": "French Avenue",
+    "modelo": "Amber Empire",
+    "tipo": "arabe",
+    "genero": "unisex",
+    "precio": 93000,
+    "volumen": "100 ml",
+    "imagenes": "/img/arabe/images (6).jpg"
+  },
+  {
+    "id": 8,
+    "marca": "Lattafa",
+    "modelo": "Khamrah Waha",
+    "tipo": "arabe",
+    "genero": "mujer",
+    "precio": 39900,
+    "volumen": "100 ml",
+    "imagenes": "/img/arabe/images (7).jpg"
+  },
+  {
+    "id": 9,
+    "marca": "Dior",
+    "modelo": "Sauvage EDP",
+    "tipo": "diseñador",
+    "genero": "hombre",
+    "precio": 148800,
+    "volumen": "100 ml",
+    "imagenes": "/img/disenador/descargar.webp"
+  },
+  {
+    "id": 10,
+    "marca": "Jean Paul Gaultier",
+    "modelo": "Le Beau Paradise Garden",
+    "tipo": "diseñador",
+    "genero": "hombre",
+    "precio": 133190,
+    "volumen": "125 ml",
+    "imagenes": "/img/disenador/descargar (1).webp"
+  },
+  {
+    "id": 11,
+    "marca": "Paco Rabanne",
+    "modelo": "One Million",
+    "tipo": "diseñador",
+    "genero": "hombre",
+    "precio": 66990,
+    "volumen": "100 ml",
+    "imagenes": "/img/disenador/images.jpg"
+  },
+  {
+    "id": 12,
+    "marca": "Giorgio Armani",
+    "modelo": "Acqua Di Gio Profondo",
+    "tipo": "diseñador",
+    "genero": "hombre",
+    "precio": 119990,
+    "volumen": "100 ml",
+    "imagenes": "/img/disenador/OIP.webp"
+  },
+  {
+    "id": 13,
+    "marca": "Giorgio Armani",
+    "modelo": "Acqua Di Gio",
+    "tipo": "diseñador",
+    "genero": "hombre",
+    "precio": 106400,
+    "volumen": "100 ml",
+    "imagenes": "/img/disenador/OIP (1).webp"
+  },
+  {
+    "id": 14,
+    "marca": "Jean Paul Gaultier",
+    "modelo": "Le Beau Parfum",
+    "tipo": "diseñador",
+    "genero": "hombre",
+    "precio": 144990,
+    "volumen": "125 ml",
+    "imagenes": "/img/disenador/OIP (2).webp"
+  },
+  {
+    "id": 15,
+    "marca": "Paco Rabanne",
+    "modelo": "One Million Royal",
+    "tipo": "diseñador",
+    "genero": "hombre",
+    "precio": 95000,
+    "volumen": "100 ml",
+    "imagenes": "/img/disenador/OIP (3).webp"
+  },
+  {
+    "id": 16,
+    "marca": "Paco Rabanne",
+    "modelo": "Invictus Parfume",
+    "tipo": "diseñador",
+    "genero": "hombre",
+    "precio": 133080,
+    "volumen": "100 ml",
+    "imagenes": "/img/disenador/OIP (4).webp"
+  },
+  {
+    "id": 17,
+    "marca": "Versace",
+    "modelo": "Eros Flame",
+    "tipo": "diseñador",
+    "genero": "hombre",
+    "precio": 55000,
+    "volumen": "100 ml",
+    "imagenes": "/img/disenador/OIP (5).webp"
+  },
+  {
+    "id": 18,
+    "marca": "Armani",
+    "modelo": "Stronger With You Intensely",
+    "tipo": "diseñador",
+    "genero": "hombre",
+    "precio": 74900,
+    "volumen": "100 ml",
+    "imagenes": "/img/disenador/OIP (6).webp"
+  },
+  {
+    "id": 19,
+    "marca": "Xerjoff",
+    "modelo": "Erba Pura",
+    "tipo": "nicho",
+    "genero": "unisex",
+    "precio": 95000,
+    "volumen": "100 ml",
+    "imagenes": "/img/nicho/images.jpg"
+  },
+  {
+    "id": 20,
+    "marca": "L'Artisan Parfumeur",
+    "modelo": "Mirabilis",
+    "tipo": "nicho",
+    "genero": "unisex",
+    "precio": 98000,
+    "volumen": "100 ml",
+    "imagenes": "/img/nicho/images (1).jpg"
+  },
+  {
+    "id": 21,
+    "marca": "Parfums de Marly",
+    "modelo": "Layton",
+    "tipo": "nicho",
+    "genero": "hombre",
+    "precio": 102000,
+    "volumen": "100 ml",
+    "imagenes": "img/nicho/images (2).jpg"
+  },
+  {
+    "id": 22,
+    "marca": "Ex Nihilo",
+    "modelo": "Blue Talisman",
+    "tipo": "nicho",
+    "genero": "unisex",
+    "precio": 280000,
+    "volumen": "100 ml",
+    "imagenes": "/img/nicho/images(blue).jpg"
+  },
+  {
+    "id": 23,
+    "marca": "Tom Ford",
+    "modelo": "Ombre Leather",
+    "tipo": "nicho",
+    "genero": "unisex",
+    "precio": 110000,
+    "volumen": "100 ml",
+    "imagenes": "/img/nicho/images (12).jpg"
+  },
+  {
+    "id": 24,
+    "marca": "Andrew's",
+    "modelo": "N18",
+    "tipo": "nicho",
+    "genero": "hombre",
+    "precio": 99000,
+    "volumen": "100 ml",
+    "imagenes": "/img/nicho/images (5).jpg"
+  },
+  {
+    "id": 25,
+    "marca": "Auraa",
+    "modelo": "Selene",
+    "tipo": "nicho",
+    "genero": "mujer",
+    "precio": 115000,
+    "volumen": "100 ml",
+    "imagenes": "/img/nicho/images (6).jpg"
+  },
+  {
+    "id": 26,
+    "marca": "Guisada",
+    "modelo": "Guisada",
+    "tipo": "nicho",
+    "genero": "unisex",
+    "precio": 120000,
+    "volumen": "100 ml",
+    "imagenes": "/img/nicho/images (11).jpg"
+  },
+  {
+    "id": 27,
+    "marca": "Creed",
+    "modelo": "Aventus",
+    "tipo": "nicho",
+    "genero": "hombre",
+    "precio": 125000,
+    "volumen": "100 ml",
+    "imagenes": "/img/nicho/images10.jpg"
+  }
+]

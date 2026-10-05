@@ -1,0 +1,324 @@
+/* ==========================================
+   1. RESETEO Y ESTILOS GENERALES
+   ========================================== */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  background-color: #f8f9fa;
+  color: #333;
+}
+
+/* ==========================================
+   2. NAVBAR Y NAVEGACIÓN (PERFUMES STORE)
+   ========================================== */
+.navbar-custom {
+  background-color: #1e232a !important;
+  padding-top: 0.6rem;
+  padding-bottom: 0.6rem;
+}
+
+.navbar-brand-custom {
+  color: #ffc107 !important;
+  font-weight: 700;
+  font-size: 1.35rem;
+}
+
+.nav-link-custom {
+  color: #d1d5db !important;
+  font-size: 1rem;
+  padding: 0.4rem 0.8rem !important;
+  border: 1px solid transparent;
+  border-radius: 4px;
+}
+
+.nav-link-custom:hover {
+  color: #ffffff !important;
+}
+
+.nav-link-custom.active {
+  color: #ffffff !important;
+  border-color: #3b82f6 !important;
+  background-color: rgba(255, 255, 255, 0.03);
+}
+
+.btn-registro {
+  background-color: #ffc107 !important;
+  border-color: #ffc107 !important;
+  color: #000000 !important;
+  font-weight: 600;
+}
+
+/* ==========================================
+   3. TARJETAS DE PRODUCTOS (BOOTSTRAP)
+   ========================================== */
+.card-img-top {
+  height: 260px;
+  object-fit: contain; 
+}
+
+.card-title {
+  min-height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 0.5rem;
+}
+
+.colorUnico {
+  color: #5f0202;
+  font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+}
+
+/* ==========================================
+   4. SECCIÓN DE TIENDAS Y SUCURSALES
+   ========================================== */
+.tiendas-container {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 40px 20px;
+}
+
+.tiendas-header {
+  text-align: center;
+  max-width: 650px;
+  margin: 0 auto 40px;
+}
+
+.tiendas-header h2 {
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: 12px;
+}
+
+.tiendas-header p {
+  color: #666;
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+.tienda-card {
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+  align-items: center;
+}
+
+.tienda-imagen {
+  flex: 1;
+  width: 100%;
+}
+
+.tienda-imagen img {
+  width: 100%;
+  height: auto;
+  display: block;
+  object-fit: cover;
+}
+
+.tienda-detalle {
+  flex: 1;
+  width: 100%;
+}
+
+.tienda-detalle h3 {
+  font-size: 1.6rem;
+  font-weight: 700;
+  margin-bottom: 10px;
+}
+
+.direccion {
+  color: #777;
+  font-size: 0.85rem;
+  line-height: 1.4;
+  margin-bottom: 20px;
+}
+
+.tienda-detalle h4 {
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin-bottom: 12px;
+}
+
+.horarios-lista {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 24px 0;
+}
+
+.horarios-lista li {
+  font-size: 0.85rem;
+  color: #555;
+  margin-bottom: 3px;
+}
+
+.horarios-lista strong {
+  color: #222;
+  font-weight: 600;
+}
+
+.mapa-link {
+  color: #d93838;
+  font-size: 0.85rem;
+  text-decoration: underline;
+}
+
+@media (min-width: 768px) {
+  .tienda-card {
+    flex-direction: row;
+    align-items: flex-start;
+  }
+}
+
+/* ==========================================
+   5. FOOTER PERSONALIZADO
+   ========================================== */
+.site-footer {
+  width: 100%;
+  color: #ffffff;
+}
+
+.footer-top-bar {
+  background-color: #ff0000;
+  color: #ffffff;
+  text-align: center;
+  font-weight: 800;
+  font-size: 1.15rem;
+  padding: 12px 20px;
+  letter-spacing: 0.5px;
+}
+
+.footer-content {
+  background-color: #2b2b2b;
+  padding-top: 50px;
+}
+
+.footer-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 30px;
+}
+
+.footer-col {
+  flex: 1;
+  min-width: 220px;
+}
+
+.footer-col h4 {
+  font-size: 1rem;
+  font-weight: 700;
+  margin-bottom: 18px;
+  color: #ffffff;
+}
+
+.footer-col ul {
+  list-style: none;
+}
+
+.footer-col ul li {
+  margin-bottom: 12px;
+}
+
+.footer-col ul li a {
+  color: #d1d1d1;
+  text-decoration: none;
+  font-size: 0.9rem;
+  transition: color 0.2s;
+}
+
+.footer-col ul li a:hover {
+  color: #ffffff;
+}
+
+.footer-brand {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 20px;
+}
+
+.social-icons {
+  display: flex;
+  gap: 15px;
+}
+
+.social-icons a {
+  color: #ffffff;
+  font-size: 1.1rem;
+  text-decoration: none;
+  transition: opacity 0.2s;
+}
+
+.social-icons a:hover {
+  opacity: 0.7;
+}
+
+.footer-newsletter p {
+  color: #d1d1d1;
+  font-size: 0.9rem;
+  margin-bottom: 20px;
+}
+
+.newsletter-form {
+  position: relative;
+  width: 100%;
+  max-width: 320px;
+}
+
+.newsletter-form input {
+  width: 100%;
+  padding: 12px 45px 12px 20px;
+  border-radius: 50px;
+  border: 1px solid #ffffff;
+  background: #ffffff;
+  font-size: 0.85rem;
+  outline: none;
+  color: #333;
+}
+
+.newsletter-form button {
+  position: absolute;
+  right: 5px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: transparent;
+  border: none;
+  width: 35px;
+  height: 35px;
+  cursor: pointer;
+  color: #333;
+  font-size: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.footer-bottom {
+  margin-top: 50px;
+  border-top: 1px solid #444444;
+  padding: 20px 0;
+}
+
+.footer-bottom p {
+  color: #aaaaaa;
+  font-size: 0.75rem;
+}
+
+@media (max-width: 768px) {
+  .footer-container {
+    flex-direction: column;
+    gap: 30px;
+  }
+  
+  .newsletter-form {
+    max-width: 100%;
+  }
+}
