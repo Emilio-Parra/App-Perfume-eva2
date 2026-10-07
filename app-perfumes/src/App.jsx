@@ -4,11 +4,24 @@ import { ProductoCard } from './components/ProductoCard';
 import { CarritoModal } from './components/CarritoModal';
 import { DetallePage } from './components/DetallePage';
 import { Footer } from './components/Footer';
+import ContactoPage from './components/ContactoPage';
+import TiendasPage from './components/TiendasPage';
+import { LoginPage } from './components/LoginPage';
+import { RegistroPage } from './components/RegistroPage';
 
 function App() {
   const [productos, setProductos] = useState([]);
   const [productoSeleccionado, setProductoSeleccionado] = useState(null);
   const [categoriaActual, setCategoriaActual] = useState('inicio');
+  
+  // Estado para el filtro por género (Todos, Hombre, Mujer, Unisex)
+  const [filtroGenero, setFiltroGenero] = useState('todos');
+
+  // Estado para el usuario que inició sesión
+  const [usuarioActual, setUsuarioActual] = useState(() => {
+    const sesion = localStorage.getItem('usuario_actual');
+    return sesion ? JSON.parse(sesion) : null;
+  });
 
   const [carrito, setCarrito] = useState(() => {
     const guardado = localStorage.getItem('carrito_perfumes');
@@ -30,6 +43,18 @@ function App() {
   const handleSeleccionarCategoria = (cat) => {
     setCategoriaActual(cat);
     setProductoSeleccionado(null);
+    setFiltroGenero('todos'); // Reinicia el filtro al cambiar de pestaña
+  };
+
+  const handleLoginSuccess = (usuario) => {
+    setUsuarioActual(usuario);
+    setCategoriaActual('inicio');
+  };
+
+  const handleCerrarSesion = () => {
+    localStorage.removeItem('usuario_actual');
+    setUsuarioActual(null);
+    setCategoriaActual('inicio');
   };
 
   const handleAgregarAlCarrito = (producto) => {
@@ -54,33 +79,39 @@ function App() {
     setCarrito([]);
   };
 
-  // Filtrado de productos según la pestaña seleccionada
+  // 1. Filtrar por Categoría de la página
   const productosFiltrados = (() => {
-    // 1. En INICIO: muestra solo los ID seleccionados y limita a máximo 3
+    let lista = [];
+
     if (categoriaActual === 'inicio') {
       const idsInicio = [6, 2, 3, 17];
-      return productos
-        .filter((p) => idsInicio.includes(Number(p.id)))
-        .slice(0, 3);
+      lista = productos.filter((p) => idsInicio.includes(Number(p.id)));
+    } else if (categoriaActual === 'todos') {
+      lista = productos;
+    } else {
+      lista = productos.filter((p) => {
+        const catProducto = (p.tipo || p.categoria || '')
+          .toLowerCase()
+          .normalize('NFD')
+          .replace(/[\u0300-\u036f]/g, '');
+        const catBuscada = categoriaActual
+          .toLowerCase()
+          .normalize('NFD')
+          .replace(/[\u0300-\u036f]/g, '');
+        return catProducto.includes(catBuscada) || catBuscada.includes(catProducto);
+      });
     }
 
-    // 2. En CATÁLOGO COMPLETO: muestra todos los productos
-    if (categoriaActual === 'todos') {
-      return productos;
+    // 2. Aplicar Filtro por Género (Hombre / Mujer / Unisex)
+    if (filtroGenero !== 'todos') {
+      lista = lista.filter((p) => {
+        const generoMatch = p.genero && p.genero.toLowerCase().trim() === filtroGenero.toLowerCase();
+        const tipoMatch = p.tipo && p.tipo.toLowerCase().trim() === filtroGenero.toLowerCase();
+        return generoMatch || tipoMatch;
+      });
     }
 
-    // 3. En categorías específicas (árabe, diseñador, nicho)
-    return productos.filter((p) => {
-      const catProducto = (p.tipo || p.categoria || '')
-        .toLowerCase()
-        .normalize('NFD')
-        .replace(/[\u0300-\u036f]/g, '');
-      const catBuscada = categoriaActual
-        .toLowerCase()
-        .normalize('NFD')
-        .replace(/[\u0300-\u036f]/g, '');
-      return catProducto.includes(catBuscada) || catBuscada.includes(catProducto);
-    });
+    return lista;
   })();
 
   const totalItems = carrito.reduce((acc, item) => acc + item.cantidad, 0);
@@ -92,19 +123,33 @@ function App() {
         onOpenCart={() => setIsCartOpen(true)} 
         categoriaActual={categoriaActual}
         onSeleccionarCategoria={handleSeleccionarCategoria}
+        usuarioActual={usuarioActual}
+        onCerrarSesion={handleCerrarSesion}
       />
 
-      {/* VISTA 1: Detalle de Producto por ID */}
+      {/* Vistas Dinámicas */}
       {productoSeleccionado ? (
         <DetallePage
           producto={productoSeleccionado}
           onVolver={() => setProductoSeleccionado(null)}
           onAgregar={handleAgregarAlCarrito}
         />
+      ) : categoriaActual === 'contacto' ? (
+        <ContactoPage />
+      ) : categoriaActual === 'tiendas' ? (
+        <TiendasPage />
+      ) : categoriaActual === 'login' ? (
+        <LoginPage 
+          onLoginSuccess={handleLoginSuccess}
+          onIrARegistro={() => setCategoriaActual('registro')}
+        />
+      ) : categoriaActual === 'registro' ? (
+        <RegistroPage 
+          onIrALogin={() => setCategoriaActual('login')}
+        />
       ) : (
-        /* VISTA 2: Páginas principales */
         <>
-          {/* Carrusel de imágenes solo para la sección INICIO */}
+          {/* Carrusel de imágenes en INICIO */}
           {categoriaActual === 'inicio' && (
             <div id="carouselInicio" className="carousel slide" data-bs-ride="carousel" data-bs-interval="2500">
               <div className="carousel-inner" style={{ height: '450px' }}>
@@ -137,8 +182,23 @@ function App() {
               {categoriaActual === 'nicho' && 'Perfumes Nicho'}
             </h1>
 
+            {/* Botones de Filtro (Todos / Hombre / Mujer / Unisex) */}
+            <div className="d-flex justify-content-center flex-wrap gap-2 mb-4">
+              {['todos', 'hombre', 'mujer', 'unisex'].map((opcion) => (
+                <button
+                  key={opcion}
+                  className={`btn ${filtroGenero === opcion ? 'btn-dark' : 'btn-outline-dark'} text-capitalize fw-semibold px-3`}
+                  onClick={() => setFiltroGenero(opcion)}
+                >
+                  {opcion === 'todos' ? 'Todos' : opcion.charAt(0).toUpperCase() + opcion.slice(1)}
+                </button>
+              ))}
+            </div>
+
             {productosFiltrados.length === 0 ? (
-              <p className="text-center text-muted fs-5 my-5">No hay productos disponibles.</p>
+              <p className="text-center text-muted fs-5 my-5">
+                No hay productos disponibles para este filtro.
+              </p>
             ) : (
               <div className="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4">
                 {productosFiltrados.map((prod) => (
@@ -153,7 +213,7 @@ function App() {
             )}
           </main>
 
-          {/* Sección de Video de YouTube solo para la sección INICIO */}
+          {/* Sección de Video solo en INICIO */}
           {categoriaActual === 'inicio' && (
             <section className="container my-5 text-center">
               <h2 className="mb-4 fw-bold">Conoce cómo aplicar tus fragancias</h2>
