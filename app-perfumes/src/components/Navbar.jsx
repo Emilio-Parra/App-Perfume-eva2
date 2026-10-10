@@ -1,10 +1,18 @@
 import React, { useState } from 'react';
 
+// Un solo enlace "Catálogo": las categorías se filtran dentro de esa página
+const ENLACES = [
+  { pagina: 'inicio', etiqueta: 'Inicio' },
+  { pagina: 'catalogo', etiqueta: 'Catálogo' },
+  { pagina: 'tiendas', etiqueta: 'Tiendas' },
+  { pagina: 'contacto', etiqueta: 'Contacto' },
+];
+
 export function Navbar({ 
   totalItems, 
   onOpenCart, 
-  categoriaActual, 
-  onSeleccionarCategoria, 
+  paginaActual, 
+  onNavegar, 
   usuarioActual, 
   onCerrarSesion 
 }) {
@@ -16,7 +24,7 @@ export function Navbar({
   };
 
   const handleNavClick = (cat) => {
-    onSeleccionarCategoria(cat);
+    onNavegar(cat);
     setIsNavOpen(false); // Cierra automáticamente el menú al hacer clic en una opción
   };
 
@@ -46,62 +54,16 @@ export function Navbar({
         {/* Menú colapsable con clase condicional 'show' */}
         <div className={`collapse navbar-collapse ${isNavOpen ? 'show' : ''}`} id="navbarNav">
           <ul className="navbar-nav me-auto mb-2 mb-lg-0 mt-2 mt-lg-0">
-            <li className="nav-item">
-              <button 
-                className={`nav-link btn btn-link text-decoration-none text-start w-100 ${categoriaActual === 'inicio' ? 'active fw-bold text-warning' : ''}`}
-                onClick={() => handleNavClick('inicio')}
-              >
-                Inicio
-              </button>
-            </li>
-            <li className="nav-item">
-              <button 
-                className={`nav-link btn btn-link text-decoration-none text-start w-100 ${categoriaActual === 'todos' ? 'active fw-bold text-warning' : ''}`}
-                onClick={() => handleNavClick('todos')}
-              >
-                Catálogo
-              </button>
-            </li>
-            <li className="nav-item">
-              <button 
-                className={`nav-link btn btn-link text-decoration-none text-start w-100 ${categoriaActual === 'arabe' ? 'active fw-bold text-warning' : ''}`}
-                onClick={() => handleNavClick('arabe')}
-              >
-                Árabes
-              </button>
-            </li>
-            <li className="nav-item">
-              <button 
-                className={`nav-link btn btn-link text-decoration-none text-start w-100 ${categoriaActual === 'diseñador' ? 'active fw-bold text-warning' : ''}`}
-                onClick={() => handleNavClick('diseñador')}
-              >
-                Diseñador
-              </button>
-            </li>
-            <li className="nav-item">
-              <button 
-                className={`nav-link btn btn-link text-decoration-none text-start w-100 ${categoriaActual === 'nicho' ? 'active fw-bold text-warning' : ''}`}
-                onClick={() => handleNavClick('nicho')}
-              >
-                Nichos
-              </button>
-            </li>
-            <li className="nav-item">
-              <button 
-                className={`nav-link btn btn-link text-decoration-none text-start w-100 ${categoriaActual === 'tiendas' ? 'active fw-bold text-warning' : ''}`}
-                onClick={() => handleNavClick('tiendas')}
-              >
-                Tiendas
-              </button>
-            </li>
-            <li className="nav-item">
-              <button 
-                className={`nav-link btn btn-link text-decoration-none text-start w-100 ${categoriaActual === 'contacto' ? 'active fw-bold text-warning' : ''}`}
-                onClick={() => handleNavClick('contacto')}
-              >
-                Contacto
-              </button>
-            </li>
+            {ENLACES.map(({ pagina, etiqueta }) => (
+              <li className="nav-item" key={pagina}>
+                <button
+                  className={`nav-link btn btn-link text-decoration-none text-start w-100 ${paginaActual === pagina ? 'active fw-bold text-warning' : ''}`}
+                  onClick={() => handleNavClick(pagina)}
+                >
+                  {etiqueta}
+                </button>
+              </li>
+            ))}
           </ul>
 
           {/* Botones de Sesión y Carrito */}

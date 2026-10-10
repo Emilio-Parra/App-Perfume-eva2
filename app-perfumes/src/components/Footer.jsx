@@ -1,6 +1,12 @@
 import React from 'react';
 
-export const Footer = () => {
+export const Footer = ({ onNavegar }) => {
+  const ir = (e, pagina, categoria) => {
+    e.preventDefault();
+    onNavegar(pagina, categoria);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
   return (
     <footer className="site-footer mt-5">
       <div className="footer-top-bar">
@@ -17,17 +23,18 @@ export const Footer = () => {
           <div className="footer-col">
             <h4>Navegación</h4>
             <ul>
-              <li><a href="#inicio">Inicio</a></li>
-              <li><a href="#catalogo">Catálogo</a></li>
-              <li><a href="#arabes">Árabes</a></li>
-              <li><a href="#disenador">Diseñador</a></li>
+              <li><a href="#inicio" onClick={(e) => ir(e, 'inicio')}>Inicio</a></li>
+              <li><a href="#catalogo" onClick={(e) => ir(e, 'catalogo')}>Catálogo</a></li>
+              <li><a href="#arabes" onClick={(e) => ir(e, 'catalogo', 'arabe')}>Árabes</a></li>
+              <li><a href="#disenador" onClick={(e) => ir(e, 'catalogo', 'diseñador')}>Diseñador</a></li>
+              <li><a href="#nicho" onClick={(e) => ir(e, 'catalogo', 'nicho')}>Nicho</a></li>
             </ul>
           </div>
           <div className="footer-col">
             <h4>Información</h4>
             <ul>
-              <li><a href="#tiendas">Nuestras Tiendas</a></li>
-              <li><a href="#contacto">Contacto</a></li>
+              <li><a href="#tiendas" onClick={(e) => ir(e, 'tiendas')}>Nuestras Tiendas</a></li>
+              <li><a href="#contacto" onClick={(e) => ir(e, 'contacto')}>Contacto</a></li>
               <li><a href="#terminos">Términos y Condiciones</a></li>
             </ul>
           </div>

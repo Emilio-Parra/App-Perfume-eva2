@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Navbar } from './components/Navbar';
 import { ProductoCard } from './components/ProductoCard';
+import { CatalogoPage } from './components/CatalogoPage';
 import { CarritoModal } from './components/CarritoModal';
 import { DetallePage } from './components/DetallePage';
 import { Footer } from './components/Footer';
@@ -12,9 +13,11 @@ import { RegistroPage } from './components/RegistroPage';
 function App() {
   const [productos, setProductos] = useState([]);
   const [productoSeleccionado, setProductoSeleccionado] = useState(null);
-  const [categoriaActual, setCategoriaActual] = useState('inicio');
-  
-  // Estado para el filtro por género (Todos, Hombre, Mujer, Unisex)
+  // Página visible: inicio | catalogo | tiendas | contacto | login | registro
+  const [paginaActual, setPaginaActual] = useState('inicio');
+
+  // Filtros del catálogo (viven aquí para no perderse al abrir un detalle y volver)
+  const [filtroCategoria, setFiltroCategoria] = useState('todas');
   const [filtroGenero, setFiltroGenero] = useState('todos');
 
   // Estado para el usuario que inició sesión
@@ -40,21 +43,25 @@ function App() {
     localStorage.setItem('carrito_perfumes', JSON.stringify(carrito));
   }, [carrito]);
 
-  const handleSeleccionarCategoria = (cat) => {
-    setCategoriaActual(cat);
+  // categoria es opcional: permite abrir el catálogo ya filtrado (ej. desde el footer)
+  const handleNavegar = (pagina, categoria = 'todas') => {
+    setPaginaActual(pagina);
     setProductoSeleccionado(null);
-    setFiltroGenero('todos'); // Reinicia el filtro al cambiar de pestaña
+    if (pagina === 'catalogo') {
+      setFiltroCategoria(categoria);
+      setFiltroGenero('todos');
+    }
   };
 
   const handleLoginSuccess = (usuario) => {
     setUsuarioActual(usuario);
-    setCategoriaActual('inicio');
+    setPaginaActual('inicio');
   };
 
   const handleCerrarSesion = () => {
     localStorage.removeItem('usuario_actual');
     setUsuarioActual(null);
-    setCategoriaActual('inicio');
+    setPaginaActual('inicio');
   };
 
   const handleAgregarAlCarrito = (producto) => {
@@ -79,40 +86,8 @@ function App() {
     setCarrito([]);
   };
 
-  // 1. Filtrar por Categoría de la página
-  const productosFiltrados = (() => {
-    let lista = [];
-
-    if (categoriaActual === 'inicio') {
-      const idsInicio = [6, 2, 3, 17];
-      lista = productos.filter((p) => idsInicio.includes(Number(p.id)));
-    } else if (categoriaActual === 'todos') {
-      lista = productos;
-    } else {
-      lista = productos.filter((p) => {
-        const catProducto = (p.tipo || p.categoria || '')
-          .toLowerCase()
-          .normalize('NFD')
-          .replace(/[\u0300-\u036f]/g, '');
-        const catBuscada = categoriaActual
-          .toLowerCase()
-          .normalize('NFD')
-          .replace(/[\u0300-\u036f]/g, '');
-        return catProducto.includes(catBuscada) || catBuscada.includes(catProducto);
-      });
-    }
-
-    // 2. Aplicar Filtro por Género (Hombre / Mujer / Unisex)
-    if (filtroGenero !== 'todos') {
-      lista = lista.filter((p) => {
-        const generoMatch = p.genero && p.genero.toLowerCase().trim() === filtroGenero.toLowerCase();
-        const tipoMatch = p.tipo && p.tipo.toLowerCase().trim() === filtroGenero.toLowerCase();
-        return generoMatch || tipoMatch;
-      });
-    }
-
-    return lista;
-  })();
+  // Productos destacados que se muestran en Inicio
+  const productosInicio = productos.filter((p) => [6, 2, 3, 17].includes(Number(p.id)));
 
   const totalItems = carrito.reduce((acc, item) => acc + item.cantidad, 0);
 
@@ -121,8 +96,8 @@ function App() {
       <Navbar 
         totalItems={totalItems} 
         onOpenCart={() => setIsCartOpen(true)} 
-        categoriaActual={categoriaActual}
-        onSeleccionarCategoria={handleSeleccionarCategoria}
+        paginaActual={paginaActual}
+        onNavegar={handleNavegar}
         usuarioActual={usuarioActual}
         onCerrarSesion={handleCerrarSesion}
       />
@@ -134,24 +109,33 @@ function App() {
           onVolver={() => setProductoSeleccionado(null)}
           onAgregar={handleAgregarAlCarrito}
         />
-      ) : categoriaActual === 'contacto' ? (
+      ) : paginaActual === 'contacto' ? (
         <ContactoPage />
-      ) : categoriaActual === 'tiendas' ? (
+      ) : paginaActual === 'tiendas' ? (
         <TiendasPage />
-      ) : categoriaActual === 'login' ? (
-        <LoginPage 
+      ) : paginaActual === 'login' ? (
+        <LoginPage
           onLoginSuccess={handleLoginSuccess}
-          onIrARegistro={() => setCategoriaActual('registro')}
+          onIrARegistro={() => setPaginaActual('registro')}
         />
-      ) : categoriaActual === 'registro' ? (
-        <RegistroPage 
-          onIrALogin={() => setCategoriaActual('login')}
+      ) : paginaActual === 'registro' ? (
+        <RegistroPage
+          onIrALogin={() => setPaginaActual('login')}
+        />
+      ) : paginaActual === 'catalogo' ? (
+        <CatalogoPage
+          productos={productos}
+          filtroCategoria={filtroCategoria}
+          onCambiarCategoria={setFiltroCategoria}
+          filtroGenero={filtroGenero}
+          onCambiarGenero={setFiltroGenero}
+          onAgregar={handleAgregarAlCarrito}
+          onVerDetalle={setProductoSeleccionado}
         />
       ) : (
         <>
           {/* Carrusel de imágenes en INICIO */}
-          {categoriaActual === 'inicio' && (
-            <div id="carouselInicio" className="carousel slide" data-bs-ride="carousel" data-bs-interval="2500">
+          <div id="carouselInicio" className="carousel slide" data-bs-ride="carousel" data-bs-interval="2500">
               <div className="carousel-inner" style={{ height: '450px' }}>
                 <div className="carousel-item active h-100">
                   <img 
@@ -170,52 +154,33 @@ function App() {
                   />
                 </div>
               </div>
-            </div>
-          )}
+          </div>
 
           <main className="container my-5 flex-grow-1">
             <h1 className="text-center fw-bold mb-4 display-5 text-dark text-uppercase">
-              {categoriaActual === 'inicio' && 'MÁS VENDIDOS'}
-              {categoriaActual === 'todos' && 'Catálogo Completo'}
-              {categoriaActual === 'arabe' && 'Perfumes Árabes'}
-              {categoriaActual === 'diseñador' && 'Perfumes de Diseñador'}
-              {categoriaActual === 'nicho' && 'Perfumes Nicho'}
+              Más vendidos
             </h1>
 
-            {/* Botones de Filtro (Todos / Hombre / Mujer / Unisex) */}
-            <div className="d-flex justify-content-center flex-wrap gap-2 mb-4">
-              {['todos', 'hombre', 'mujer', 'unisex'].map((opcion) => (
-                <button
-                  key={opcion}
-                  className={`btn ${filtroGenero === opcion ? 'btn-dark' : 'btn-outline-dark'} text-capitalize fw-semibold px-3`}
-                  onClick={() => setFiltroGenero(opcion)}
-                >
-                  {opcion === 'todos' ? 'Todos' : opcion.charAt(0).toUpperCase() + opcion.slice(1)}
-                </button>
+            <div className="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4">
+              {productosInicio.map((prod) => (
+                <ProductoCard
+                  key={prod.id}
+                  producto={prod}
+                  onAgregar={handleAgregarAlCarrito}
+                  onVerDetalle={setProductoSeleccionado}
+                />
               ))}
             </div>
 
-            {productosFiltrados.length === 0 ? (
-              <p className="text-center text-muted fs-5 my-5">
-                No hay productos disponibles para este filtro.
-              </p>
-            ) : (
-              <div className="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4">
-                {productosFiltrados.map((prod) => (
-                  <ProductoCard
-                    key={prod.id}
-                    producto={prod}
-                    onAgregar={handleAgregarAlCarrito}
-                    onVerDetalle={setProductoSeleccionado}
-                  />
-                ))}
-              </div>
-            )}
+            <div className="text-center mt-4">
+              <button className="btn btn-dark px-4" onClick={() => handleNavegar('catalogo')}>
+                Ver catálogo completo
+              </button>
+            </div>
           </main>
 
           {/* Sección de Video solo en INICIO */}
-          {categoriaActual === 'inicio' && (
-            <section className="container my-5 text-center">
+          <section className="container my-5 text-center">
               <h2 className="mb-4 fw-bold">Conoce cómo aplicar tus fragancias</h2>
               <div className="ratio ratio-16x9 mx-auto shadow rounded" style={{ maxWidth: '700px' }}>
                 <iframe 
@@ -225,8 +190,7 @@ function App() {
                   allowFullScreen
                 ></iframe>
               </div>
-            </section>
-          )}
+          </section>
         </>
       )}
 
@@ -238,7 +202,7 @@ function App() {
         onVaciar={handleVaciarCarrito}
       />
 
-      <Footer />
+      <Footer onNavegar={handleNavegar} />
     </div>
   );
 }
