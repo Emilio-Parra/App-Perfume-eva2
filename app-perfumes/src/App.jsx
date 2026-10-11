@@ -2,18 +2,22 @@ import React, { useState, useEffect } from 'react';
 import { Navbar } from './components/Navbar';
 import { ProductoCard } from './components/ProductoCard';
 import { CatalogoPage } from './components/CatalogoPage';
-import { CarritoModal } from './components/CarritoModal';
+import { CarritoPage } from './components/CarritoPage';
+import { CheckoutPage } from './components/CheckoutPage';
+import { CompraExitosaPage } from './components/CompraExitosaPage';
+import { PagoFallidoPage } from './components/PagoFallidoPage';
 import { DetallePage } from './components/DetallePage';
 import { Footer } from './components/Footer';
 import ContactoPage from './components/ContactoPage';
 import TiendasPage from './components/TiendasPage';
 import { LoginPage } from './components/LoginPage';
 import { RegistroPage } from './components/RegistroPage';
+import { crearPedido, procesarPago } from './service/pedidosService';
 
 function App() {
   const [productos, setProductos] = useState([]);
   const [productoSeleccionado, setProductoSeleccionado] = useState(null);
-  // Página visible: inicio | catalogo | tiendas | contacto | login | registro
+  // Página visible: inicio | catalogo | carrito | checkout | compra-exitosa | pago-fallido | tiendas | contacto | login | registro
   const [paginaActual, setPaginaActual] = useState('inicio');
 
   // Filtros del catálogo (viven aquí para no perderse al abrir un detalle y volver)
@@ -30,7 +34,10 @@ function App() {
     const guardado = localStorage.getItem('carrito_perfumes');
     return guardado ? JSON.parse(guardado) : [];
   });
-  const [isCartOpen, setIsCartOpen] = useState(false);
+
+  // Pedido que se está pagando / acaba de pagarse, y si hay un pago en curso
+  const [pedidoActual, setPedidoActual] = useState(null);
+  const [procesandoPago, setProcesandoPago] = useState(false);
 
   useEffect(() => {
     fetch('/data/productos.json')
@@ -86,16 +93,57 @@ function App() {
     setCarrito([]);
   };
 
+  // delta = +1 o -1; la cantidad mínima es 1 (para quitar el producto se usa "Eliminar")
+  const handleCambiarCantidad = (id, delta) => {
+    setCarrito((prev) =>
+      prev.map((item) =>
+        item.id === id ? { ...item, cantidad: Math.max(1, item.cantidad + delta) } : item
+      )
+    );
+  };
+
+  // ---------- Pago ----------
+  // Cobra el pedido y muestra la vista de éxito o de error según el resultado.
+  // El carrito solo se vacía si el pago fue exitoso.
+  const cobrarPedido = async (pedido) => {
+    setProcesandoPago(true);
+    const resultado = await procesarPago(pedido.id);
+    setProcesandoPago(false);
+    setPedidoActual(resultado);
+
+    if (resultado.estado === 'pagado') {
+      setCarrito([]);
+      setPaginaActual('compra-exitosa');
+    } else {
+      setPaginaActual('pago-fallido');
+    }
+  };
+
+  // Checkout: crea el pedido con los datos del formulario y lo cobra
+  const handlePagar = ({ cliente, envio }) => {
+    if (procesandoPago) return;
+    const pedido = crearPedido({ cliente, envio, items: carrito });
+    setPedidoActual(pedido);
+    cobrarPedido(pedido);
+  };
+
+  // "Volver a realizar el pago": reintenta el mismo pedido (mismo número)
+  const handleReintentarPago = () => {
+    if (procesandoPago || !pedidoActual) return;
+    cobrarPedido(pedidoActual);
+  };
+
   // Productos destacados que se muestran en Inicio
   const productosInicio = productos.filter((p) => [6, 2, 3, 17].includes(Number(p.id)));
 
   const totalItems = carrito.reduce((acc, item) => acc + item.cantidad, 0);
+  const totalMonto = carrito.reduce((acc, item) => acc + item.precio * item.cantidad, 0);
 
   return (
     <div className="d-flex flex-column min-vh-100">
       <Navbar 
         totalItems={totalItems} 
-        onOpenCart={() => setIsCartOpen(true)} 
+        totalMonto={totalMonto}
         paginaActual={paginaActual}
         onNavegar={handleNavegar}
         usuarioActual={usuarioActual}
@@ -121,6 +169,38 @@ function App() {
       ) : paginaActual === 'registro' ? (
         <RegistroPage
           onIrALogin={() => setPaginaActual('login')}
+        />
+      ) : paginaActual === 'carrito' ? (
+        <CarritoPage
+          carrito={carrito}
+          productos={productos}
+          onAgregar={handleAgregarAlCarrito}
+          onCambiarCantidad={handleCambiarCantidad}
+          onEliminar={handleEliminarDelCarrito}
+          onVaciar={handleVaciarCarrito}
+          onComprar={() => handleNavegar('checkout')}
+          onVerDetalle={setProductoSeleccionado}
+          onIrACatalogo={() => handleNavegar('catalogo')}
+        />
+      ) : paginaActual === 'checkout' ? (
+        <CheckoutPage
+          carrito={carrito}
+          usuarioActual={usuarioActual}
+          procesando={procesandoPago}
+          onPagar={handlePagar}
+          onVolver={() => handleNavegar('carrito')}
+        />
+      ) : paginaActual === 'compra-exitosa' ? (
+        <CompraExitosaPage
+          pedido={pedidoActual}
+          onSeguirComprando={() => handleNavegar('catalogo')}
+        />
+      ) : paginaActual === 'pago-fallido' ? (
+        <PagoFallidoPage
+          pedido={pedidoActual}
+          procesando={procesandoPago}
+          onReintentar={handleReintentarPago}
+          onVolverAlCarrito={() => handleNavegar('carrito')}
         />
       ) : paginaActual === 'catalogo' ? (
         <CatalogoPage
@@ -193,14 +273,6 @@ function App() {
           </section>
         </>
       )}
-
-      <CarritoModal
-        isOpen={isCartOpen}
-        onClose={() => setIsCartOpen(false)}
-        carrito={carrito}
-        onEliminar={handleEliminarDelCarrito}
-        onVaciar={handleVaciarCarrito}
-      />
 
       <Footer onNavegar={handleNavegar} />
     </div>

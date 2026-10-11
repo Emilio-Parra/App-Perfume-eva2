@@ -322,3 +322,27 @@ body {
     max-width: 100%;
   }
 }
+
+/* ==========================================
+   CARRITO, CHECKOUT E IMPRESIÓN DE BOLETA
+   ========================================== */
+/* En escritorio la lista de productos del carrito hace scroll propio */
+@media (min-width: 992px) {
+  .lista-productos-carrito {
+    max-height: 75vh;
+    overflow-y: auto;
+  }
+}
+
+/* Al imprimir la boleta (Imprimir boleta en PDF) se ocultan navbar, footer y botones */
+@media print {
+  .no-print {
+    display: none !important;
+  }
+  body {
+    background: #fff;
+  }
+  .card {
+    box-shadow: none !important;
+  }
+}

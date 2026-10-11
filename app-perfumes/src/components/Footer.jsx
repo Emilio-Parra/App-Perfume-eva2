@@ -8,7 +8,7 @@ export const Footer = ({ onNavegar }) => {
   };
 
   return (
-    <footer className="site-footer mt-5">
+    <footer className="site-footer mt-5 no-print">
       <div className="footer-top-bar">
         🚚 ENVÍOS GRATIS A TODO CHILE POR COMPRAS SOBRE $50.000
       </div>

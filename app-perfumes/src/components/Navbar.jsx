@@ -10,7 +10,7 @@ const ENLACES = [
 
 export function Navbar({ 
   totalItems, 
-  onOpenCart, 
+  totalMonto, 
   paginaActual, 
   onNavegar, 
   usuarioActual, 
@@ -29,7 +29,7 @@ export function Navbar({
   };
 
   return (
-    <nav className="navbar navbar-expand-lg navbar-dark bg-dark sticky-top">
+    <nav className="navbar navbar-expand-lg navbar-dark bg-dark sticky-top no-print">
       <div className="container-fluid">
         <a 
           className="navbar-brand fw-bold text-warning d-flex align-items-center gap-2"
@@ -101,14 +101,11 @@ export function Navbar({
             )}
 
             <button 
-              className="btn btn-warning position-relative ms-lg-2" 
+              className={`btn btn-warning position-relative ms-lg-2 ${paginaActual === 'carrito' ? 'border border-dark border-2' : ''}`} 
               type="button" 
-              onClick={() => {
-                onOpenCart();
-                setIsNavOpen(false);
-              }}
+              onClick={() => handleNavClick('carrito')}
             >
-              🛒 Carrito
+              🛒 Carrito {totalMonto > 0 && `$${totalMonto.toLocaleString('es-CL')}`}
               {totalItems > 0 && (
                 <span className="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
                   {totalItems}
