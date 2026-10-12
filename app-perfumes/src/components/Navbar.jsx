@@ -73,6 +73,14 @@ export function Navbar({
                 <span className="text-light small">
                   👤 Hola, <strong>{usuarioActual.nombre || usuarioActual.correo}</strong>
                 </span>
+                {usuarioActual.rol === 'admin' && (
+                  <button
+                    className="btn btn-warning btn-sm fw-bold"
+                    onClick={() => handleNavClick('admin')}
+                  >
+                    Panel admin
+                  </button>
+                )}
                 <button 
                   className="btn btn-outline-danger btn-sm"
                   onClick={() => {

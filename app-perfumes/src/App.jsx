@@ -13,6 +13,9 @@ import TiendasPage from './components/TiendasPage';
 import { LoginPage } from './components/LoginPage';
 import { RegistroPage } from './components/RegistroPage';
 import { crearPedido, procesarPago } from './service/pedidosService';
+import { cargarProductos, obtenerProductos, descontarStock } from './service/productosService';
+import { asegurarAdmin } from './service/usuariosService';
+import { AdminPage } from './components/admin/AdminPage';
 
 function App() {
   const [productos, setProductos] = useState([]);
@@ -40,11 +43,16 @@ function App() {
   const [procesandoPago, setProcesandoPago] = useState(false);
 
   useEffect(() => {
-    fetch('/data/productos.json')
-      .then((res) => res.json())
+    asegurarAdmin(); // crea el usuario administrador por defecto si no existe
+    cargarProductos()
       .then((data) => setProductos(data))
       .catch((err) => console.error('Error cargando los productos:', err));
   }, []);
+
+  // El panel admin modifica los productos: se vuelve a leer el catálogo para la tienda
+  const recargarProductos = () => setProductos(obtenerProductos());
+
+  const esAdmin = usuarioActual?.rol === 'admin';
 
   useEffect(() => {
     localStorage.setItem('carrito_perfumes', JSON.stringify(carrito));
@@ -62,7 +70,13 @@ function App() {
 
   const handleLoginSuccess = (usuario) => {
     setUsuarioActual(usuario);
-    setPaginaActual('inicio');
+    setPaginaActual(usuario.rol === 'admin' ? 'admin' : 'inicio');
+  };
+
+  // El admin edita su perfil o sus datos: se actualiza también la sesión guardada
+  const handleUsuarioActualizado = (usuario) => {
+    localStorage.setItem('usuario_actual', JSON.stringify(usuario));
+    setUsuarioActual(usuario);
   };
 
   const handleCerrarSesion = () => {
@@ -112,6 +126,8 @@ function App() {
     setPedidoActual(resultado);
 
     if (resultado.estado === 'pagado') {
+      descontarStock(resultado.items);
+      recargarProductos();
       setCarrito([]);
       setPaginaActual('compra-exitosa');
     } else {
@@ -138,6 +154,19 @@ function App() {
 
   const totalItems = carrito.reduce((acc, item) => acc + item.cantidad, 0);
   const totalMonto = carrito.reduce((acc, item) => acc + item.precio * item.cantidad, 0);
+
+  // Panel de administración: layout propio, solo para usuarios con rol admin
+  if (paginaActual === 'admin' && esAdmin) {
+    return (
+      <AdminPage
+        usuarioActual={usuarioActual}
+        onUsuarioActualizado={handleUsuarioActualizado}
+        onProductosCambiados={recargarProductos}
+        onIrATienda={() => handleNavegar('inicio')}
+        onCerrarSesion={handleCerrarSesion}
+      />
+    );
+  }
 
   return (
     <div className="d-flex flex-column min-vh-100">

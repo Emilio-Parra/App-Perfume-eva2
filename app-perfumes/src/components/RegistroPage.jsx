@@ -126,6 +126,7 @@ export function RegistroPage({ onIrALogin }) {
         nombre: nombreVal,
         apellido: apellidoVal,
         pass: passVal,
+        rol: 'cliente',
         fechaNac: formData.fechaNac,
         region: formData.region,
         comuna: formData.comuna,
