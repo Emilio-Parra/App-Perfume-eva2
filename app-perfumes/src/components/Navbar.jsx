@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { BuscadorNavbar } from './BuscadorNavbar';
 
 // Un solo enlace "Catálogo": las categorías se filtran dentro de esa página
 const ENLACES = [
@@ -14,13 +15,20 @@ export function Navbar({
   paginaActual, 
   onNavegar, 
   usuarioActual, 
-  onCerrarSesion 
+  onCerrarSesion,
+  textoBusqueda = '',
+  onBuscar = () => {}
 }) {
   // Estado para controlar la apertura/cierre del menú hamburguesa en móviles
   const [isNavOpen, setIsNavOpen] = useState(false);
 
   const toggleNav = () => {
     setIsNavOpen(!isNavOpen);
+  };
+
+  const handleBuscar = (texto) => {
+    onBuscar(texto);
+    setIsNavOpen(false);
   };
 
   const handleNavClick = (cat) => {
@@ -65,6 +73,9 @@ export function Navbar({
               </li>
             ))}
           </ul>
+
+          {/* Buscador de productos */}
+          <BuscadorNavbar key={textoBusqueda} textoInicial={textoBusqueda} onBuscar={handleBuscar} />
 
           {/* Botones de Sesión y Carrito */}
           <div className="d-flex flex-wrap align-items-center gap-2 mt-2 mt-lg-0 pb-2 pb-lg-0">

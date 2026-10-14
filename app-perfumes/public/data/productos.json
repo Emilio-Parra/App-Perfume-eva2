@@ -7,7 +7,8 @@
     "genero": "hombre",
     "precio": 39990,
     "volumen": "100 ml",
-    "imagenes": "/img/arabe/images.jpg"
+    "imagenes": "/img/arabe/images.jpg",
+    "descripcion": "Fragancia aromática y frutal de la línea Hawas de Rasasi, lanzada en 2025. Abre con piña, naranja y pomelo; en el corazón aparecen raíz de lirio, ámbar y lavanda, y cierra con haba tonka, almizcle, cachemira y pachulí. Fresca y luminosa, pensada para el día a día y los climas cálidos."
   },
   {
     "id": 2,
@@ -17,7 +18,8 @@
     "genero": "hombre",
     "precio": 63636,
     "volumen": "100 ml",
-    "imagenes": "/img/arabe/images (1).jpg"
+    "imagenes": "/img/arabe/images (1).jpg",
+    "descripcion": "Fragancia aromática acuática lanzada en 2025. Su salida combina mandarina, menta, cidra, bergamota, grosella negra y cilantro; el corazón mezcla albahaca, zanahoria y rosa, y el fondo se apoya en higo, ambroxan y ámbar. Una opción fresca y marina, ideal para el uso diario y el verano."
   },
   {
     "id": 3,
@@ -27,7 +29,8 @@
     "genero": "mujer",
     "precio": 29990,
     "volumen": "105 ml",
-    "imagenes": "/img/arabe/images (2).jpg"
+    "imagenes": "/img/arabe/images (2).jpg",
+    "descripcion": "Fragancia gourmand floral-frutal lanzada en 2024. Abre con caramelo, azúcar y leche; en el corazón se funden la miel y las flores blancas, y termina en vainilla, praliné y almizcle. Dulce, cremosa y envolvente, para quienes disfrutan de los aromas golosos."
   },
   {
     "id": 4,
@@ -37,7 +40,8 @@
     "genero": "hombre",
     "precio": 69120,
     "volumen": "100 ml",
-    "imagenes": "/img/arabe/images (3).jpg"
+    "imagenes": "/img/arabe/images (3).jpg",
+    "descripcion": "Fragancia árabe de la casa Afnan, de carácter fresco y aromático, pensada para empezar la mañana. Combina un inicio luminoso con matices de lavanda y un fondo suave de vainilla y almizcle. Ligera, limpia y fácil de usar en oficina y clima templado."
   },
   {
     "id": 5,
@@ -47,7 +51,8 @@
     "genero": "unisex",
     "precio": 39990,
     "volumen": "100 ml",
-    "imagenes": "/img/arabe/images (4).jpg"
+    "imagenes": "/img/arabe/images (4).jpg",
+    "descripcion": "Fragancia de Armaf de perfil ambarado y especiado, con un inicio brillante y un fondo cálido de ámbar, vainilla y maderas. Intensa y de buena proyección, pensada para salidas nocturnas y climas fríos."
   },
   {
     "id": 6,
@@ -57,7 +62,8 @@
     "genero": "unisex",
     "precio": 69990,
     "volumen": "100 ml",
-    "imagenes": "/img/arabe/images (5).jpg"
+    "imagenes": "/img/arabe/images (5).jpg",
+    "descripcion": "Fragancia oriental gourmand de Lattafa. Abre con canela, nuez moscada y bergamota; en el corazón aparecen dátiles, praliné y flores blancas, y cierra con vainilla, haba tonka, benjuí y ámbar. Cálida, dulce y especiada, ideal para otoño e invierno."
   },
   {
     "id": 7,
@@ -67,7 +73,8 @@
     "genero": "unisex",
     "precio": 93000,
     "volumen": "100 ml",
-    "imagenes": "/img/arabe/images (6).jpg"
+    "imagenes": "/img/arabe/images (6).jpg",
+    "descripcion": "Fragancia ambarada de French Avenue, de carácter cálido, dulce y envolvente. Su fondo gira en torno al ámbar y la vainilla, con un toque amaderado que le da profundidad. Pensada para la noche y para quienes buscan una estela intensa."
   },
   {
     "id": 8,
@@ -77,7 +84,8 @@
     "genero": "mujer",
     "precio": 39900,
     "volumen": "100 ml",
-    "imagenes": "/img/arabe/images (7).jpg"
+    "imagenes": "/img/arabe/images (7).jpg",
+    "descripcion": "Fragancia de la línea Khamrah de Lattafa con un perfil dulce y especiado de aire gourmand. Mantiene la calidez característica de la familia, con notas cremosas y un fondo suave y envolvente. Pensada para uso femenino en tardes y noches frescas."
   },
   {
     "id": 9,
@@ -87,7 +95,8 @@
     "genero": "hombre",
     "precio": 148800,
     "volumen": "100 ml",
-    "imagenes": "/img/disenador/descargar.webp"
+    "imagenes": "/img/disenador/descargar.webp",
+    "descripcion": "Versión Eau de Parfum del clásico de Dior, creada por François Demachy en 2018. Abre con bergamota y pimienta, sigue con lavanda y termina en vainilla y haba tonka. Fresca, especiada y de gran proyección, muy versátil."
   },
   {
     "id": 10,
@@ -97,7 +106,8 @@
     "genero": "hombre",
     "precio": 133190,
     "volumen": "125 ml",
-    "imagenes": "/img/disenador/descargar (1).webp"
+    "imagenes": "/img/disenador/descargar (1).webp",
+    "descripcion": "Fragancia de Jean Paul Gaultier de la línea Le Beau, en su edición Paradise Garden. Propone un perfil fresco, verde y tropical, con notas frutales y un fondo amaderado suave. Pensada para el verano y los días cálidos."
   },
   {
     "id": 11,
@@ -107,7 +117,8 @@
     "genero": "hombre",
     "precio": 66990,
     "volumen": "100 ml",
-    "imagenes": "/img/disenador/images.jpg"
+    "imagenes": "/img/disenador/images.jpg",
+    "descripcion": "Clásico de Paco Rabanne lanzado en 2008. Abre con pomelo, mandarina sanguínea y menta; en el corazón aparecen canela, rosa y especias, y cierra con cuero, ámbar, maderas y pachulí. Dulce, especiada y llamativa, ideal para salidas de noche."
   },
   {
     "id": 12,
@@ -117,7 +128,8 @@
     "genero": "hombre",
     "precio": 119990,
     "volumen": "100 ml",
-    "imagenes": "/img/disenador/OIP.webp"
+    "imagenes": "/img/disenador/OIP.webp",
+    "descripcion": "Fragancia acuática y aromática de Giorgio Armani lanzada en 2020. Combina bergamota y notas marinas con romero y un fondo mineral con pachulí. Fresca, profunda y limpia, pensada para el verano y el uso diario."
   },
   {
     "id": 13,
@@ -127,7 +139,8 @@
     "genero": "hombre",
     "precio": 106400,
     "volumen": "100 ml",
-    "imagenes": "/img/disenador/OIP (1).webp"
+    "imagenes": "/img/disenador/OIP (1).webp",
+    "descripcion": "Clásico acuático de Giorgio Armani lanzado en 1996. Abre con limón, lima y bergamota; en el corazón aparecen notas marinas, jazmín y romero, y cierra con cedro, pachulí y almizcle blanco. Una fragancia fresca y atemporal, perfecta para el calor."
   },
   {
     "id": 14,
@@ -137,7 +150,8 @@
     "genero": "hombre",
     "precio": 144990,
     "volumen": "125 ml",
-    "imagenes": "/img/disenador/OIP (2).webp"
+    "imagenes": "/img/disenador/OIP (2).webp",
+    "descripcion": "Fragancia de Jean Paul Gaultier de la línea Le Beau, en su versión Parfum. Destaca por su apertura de bergamota y coco, un corazón cremoso y un fondo con haba tonka y maderas. Dulce, tropical y envolvente."
   },
   {
     "id": 15,
@@ -147,7 +161,8 @@
     "genero": "hombre",
     "precio": 95000,
     "volumen": "100 ml",
-    "imagenes": "/img/disenador/OIP (3).webp"
+    "imagenes": "/img/disenador/OIP (3).webp",
+    "descripcion": "Versión Royal de la familia One Million de Paco Rabanne. Mantiene el espíritu especiado y ambarado de la línea, con matices de cuero y maderas en el fondo. Intensa, lujosa y de gran estela, pensada para la noche."
   },
   {
     "id": 16,
@@ -157,7 +172,8 @@
     "genero": "hombre",
     "precio": 133080,
     "volumen": "100 ml",
-    "imagenes": "/img/disenador/OIP (4).webp"
+    "imagenes": "/img/disenador/OIP (4).webp",
+    "descripcion": "Versión Parfum de la línea Invictus de Paco Rabanne. Conserva su carácter fresco y deportivo, pero con una concentración mayor y un fondo más ambarado y amaderado. Potente y duradera, ideal para el día a día."
   },
   {
     "id": 17,
@@ -167,7 +183,8 @@
     "genero": "hombre",
     "precio": 55000,
     "volumen": "100 ml",
-    "imagenes": "/img/disenador/OIP (5).webp"
+    "imagenes": "/img/disenador/OIP (5).webp",
+    "descripcion": "Fragancia de Versace de la línea Eros, en su edición Flame. Abre con mandarina, limón y pimienta negra; en el corazón destacan romero, geranio y pimienta, y cierra con vainilla, haba tonka, sándalo y pachulí. Cálida, especiada y seductora."
   },
   {
     "id": 18,
@@ -177,7 +194,8 @@
     "genero": "hombre",
     "precio": 74900,
     "volumen": "100 ml",
-    "imagenes": "/img/disenador/OIP (6).webp"
+    "imagenes": "/img/disenador/OIP (6).webp",
+    "descripcion": "Fragancia de Giorgio Armani de la línea Stronger With You, en su versión Intensely. Combina canela, lavanda y castaña asada con un fondo de vainilla, ámbar y maderas. Dulce, cálida y cremosa, ideal para otoño e invierno."
   },
   {
     "id": 19,
@@ -187,7 +205,8 @@
     "genero": "unisex",
     "precio": 95000,
     "volumen": "100 ml",
-    "imagenes": "/img/nicho/images.jpg"
+    "imagenes": "/img/nicho/images.jpg",
+    "descripcion": "Fragancia de nicho de Xerjoff lanzada en 2019. Abre con naranja siciliana, limón y bergamota, con un corazón de frutas, y cierra con almizcle, vainilla y ámbar. Frutal, luminosa y muy dulce, de gran proyección."
   },
   {
     "id": 20,
@@ -197,7 +216,8 @@
     "genero": "unisex",
     "precio": 98000,
     "volumen": "100 ml",
-    "imagenes": "/img/nicho/images (1).jpg"
+    "imagenes": "/img/nicho/images (1).jpg",
+    "descripcion": "Perfume de nicho de la casa francesa L'Artisan Parfumeur. Una propuesta elegante y envolvente, con un fondo cálido y suave que se siente refinado sobre la piel. Pensada para quienes buscan una fragancia distinta y de carácter artesanal."
   },
   {
     "id": 21,
@@ -207,7 +227,8 @@
     "genero": "hombre",
     "precio": 102000,
     "volumen": "100 ml",
-    "imagenes": "img/nicho/images (2).jpg"
+    "imagenes": "img/nicho/images (2).jpg",
+    "descripcion": "Fragancia de nicho de Parfums de Marly lanzada en 2016. Abre con manzana, lavanda, bergamota y mandarina; en el corazón aparecen geranio, violeta y jazmín, y cierra con vainilla, cardamomo, sándalo, pimienta, guayaco y pachulí. Elegante, versátil y de excelente proyección."
   },
   {
     "id": 22,
@@ -217,7 +238,8 @@
     "genero": "unisex",
     "precio": 280000,
     "volumen": "100 ml",
-    "imagenes": "/img/nicho/images(blue).jpg"
+    "imagenes": "/img/nicho/images(blue).jpg",
+    "descripcion": "Fragancia de nicho de la casa francesa Ex Nihilo. Propone un perfil fresco y luminoso, con matices florales y un fondo amaderado limpio. Elegante y ligera, ideal para el día y los climas templados."
   },
   {
     "id": 23,
@@ -227,7 +249,8 @@
     "genero": "unisex",
     "precio": 110000,
     "volumen": "100 ml",
-    "imagenes": "/img/nicho/images (12).jpg"
+    "imagenes": "/img/nicho/images (12).jpg",
+    "descripcion": "Fragancia de la colección privada de Tom Ford lanzada en 2018. Abre con cardamomo, en el corazón destacan el cuero y el jazmín sambac, y cierra con ámbar, musgo y pachulí. Cálida, amaderada y sofisticada, con un marcado carácter de cuero."
   },
   {
     "id": 24,
@@ -237,7 +260,8 @@
     "genero": "hombre",
     "precio": 99000,
     "volumen": "100 ml",
-    "imagenes": "/img/nicho/images (5).jpg"
+    "imagenes": "/img/nicho/images (5).jpg",
+    "descripcion": "Fragancia de nicho de Andrew's, la línea N18. Propone un perfil masculino, elegante y sobrio, pensado para el uso diario y para ocasiones formales."
   },
   {
     "id": 25,
@@ -247,7 +271,8 @@
     "genero": "mujer",
     "precio": 115000,
     "volumen": "100 ml",
-    "imagenes": "/img/nicho/images (6).jpg"
+    "imagenes": "/img/nicho/images (6).jpg",
+    "descripcion": "Fragancia de nicho de la marca Auraa, en su versión Selene. Con un carácter delicado y femenino, pensada para quienes prefieren aromas suaves y elegantes, ideales para el día y la tarde."
   },
   {
     "id": 26,
@@ -257,7 +282,8 @@
     "genero": "unisex",
     "precio": 120000,
     "volumen": "100 ml",
-    "imagenes": "/img/nicho/images (11).jpg"
+    "imagenes": "/img/nicho/images (11).jpg",
+    "descripcion": "Fragancia de nicho de la marca Guisada. Un perfume distintivo y de carácter, pensado para quienes buscan un aroma diferente al de las marcas más comerciales."
   },
   {
     "id": 27,
@@ -267,6 +293,7 @@
     "genero": "hombre",
     "precio": 125000,
     "volumen": "100 ml",
-    "imagenes": "/img/nicho/images10.jpg"
+    "imagenes": "/img/nicho/images10.jpg",
+    "descripcion": "Fragancia de nicho de Creed, considerada una de las más icónicas del mundo. Abre con piña, bergamota, manzana y grosella negra; en el corazón aparecen abedul, jazmín y rosa, y cierra con almizcle, musgo de roble, ámbar gris y vainilla. Frutal, ahumada y elegante, símbolo del éxito."
   }
 ]

@@ -1,13 +1,6 @@
 import React from 'react';
 import { ProductoCard } from './ProductoCard';
-
-// Quita tildes y pasa a minúsculas para comparar sin errores ("diseñador" vs "Diseñador")
-const normalizar = (texto = '') =>
-  String(texto)
-    .toLowerCase()
-    .trim()
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '');
+import { normalizar, coincideTexto } from '../utils/busqueda';
 
 export const CATEGORIAS = [
   { valor: 'todas', etiqueta: 'Todas' },
@@ -35,18 +28,25 @@ export const CatalogoPage = ({
   onCambiarCategoria,
   filtroGenero,
   onCambiarGenero,
+  filtroTexto = '',
+  onCambiarTexto = () => {},
   onAgregar,
   onVerDetalle,
 }) => {
   const productosFiltrados = productos.filter(
-    (p) => coincideCategoria(p, filtroCategoria) && coincideGenero(p, filtroGenero)
+    (p) =>
+      coincideCategoria(p, filtroCategoria) &&
+      coincideGenero(p, filtroGenero) &&
+      coincideTexto(p, filtroTexto)
   );
 
-  const hayFiltrosActivos = filtroCategoria !== 'todas' || filtroGenero !== 'todos';
+  const hayFiltrosActivos =
+    filtroCategoria !== 'todas' || filtroGenero !== 'todos' || filtroTexto.trim() !== '';
 
   const limpiarFiltros = () => {
     onCambiarCategoria('todas');
     onCambiarGenero('todos');
+    onCambiarTexto('');
   };
 
   return (
@@ -55,6 +55,33 @@ export const CatalogoPage = ({
         Catálogo
       </h1>
 
+      {/* Buscador por texto (marca, modelo, categoría o género) */}
+      <div className="row justify-content-center mb-4">
+        <div className="col-md-8 col-lg-6">
+          <div className="input-group">
+            <span className="input-group-text" aria-hidden="true">🔍</span>
+            <input
+              type="search"
+              className="form-control"
+              placeholder="Buscar por marca, modelo, categoría o género..."
+              aria-label="Buscar productos"
+              value={filtroTexto}
+              onChange={(e) => onCambiarTexto(e.target.value)}
+            />
+            {filtroTexto && (
+              <button
+                type="button"
+                className="btn btn-outline-secondary"
+                aria-label="Borrar búsqueda"
+                onClick={() => onCambiarTexto('')}
+              >
+                ✕
+              </button>
+            )}
+          </div>
+        </div>
+      </div>
+
       {/* Filtro por categoría */}
       <div className="mb-3">
         <p className="text-center text-muted small fw-semibold text-uppercase mb-2">
@@ -62,9 +89,12 @@ export const CatalogoPage = ({
         </p>
         <div className="d-flex justify-content-center flex-wrap gap-2">
           {CATEGORIAS.map(({ valor, etiqueta }) => {
-            // El contador respeta el filtro de género activo
+            // El contador respeta el género y el texto de búsqueda activos
             const cantidad = productos.filter(
-              (p) => coincideCategoria(p, valor) && coincideGenero(p, filtroGenero)
+              (p) =>
+                coincideCategoria(p, valor) &&
+                coincideGenero(p, filtroGenero) &&
+                coincideTexto(p, filtroTexto)
             ).length;
             return (
               <button
@@ -113,7 +143,9 @@ export const CatalogoPage = ({
 
       {productosFiltrados.length === 0 ? (
         <p className="text-center text-muted fs-5 my-5">
-          No hay productos disponibles para este filtro.
+          {filtroTexto.trim()
+            ? `No encontramos resultados para "${filtroTexto.trim()}".`
+            : 'No hay productos disponibles para este filtro.'}
         </p>
       ) : (
         <div className="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4">

@@ -26,6 +26,7 @@ function App() {
   // Filtros del catálogo (viven aquí para no perderse al abrir un detalle y volver)
   const [filtroCategoria, setFiltroCategoria] = useState('todas');
   const [filtroGenero, setFiltroGenero] = useState('todos');
+  const [filtroTexto, setFiltroTexto] = useState('');
 
   // Estado para el usuario que inició sesión
   const [usuarioActual, setUsuarioActual] = useState(() => {
@@ -65,7 +66,17 @@ function App() {
     if (pagina === 'catalogo') {
       setFiltroCategoria(categoria);
       setFiltroGenero('todos');
+      setFiltroTexto('');
     }
+  };
+
+  // Buscador del Navbar: abre el catálogo con el texto buscado (y sin otros filtros)
+  const handleBuscar = (texto) => {
+    setProductoSeleccionado(null);
+    setFiltroCategoria('todas');
+    setFiltroGenero('todos');
+    setFiltroTexto(texto);
+    setPaginaActual('catalogo');
   };
 
   const handleLoginSuccess = (usuario) => {
@@ -177,6 +188,8 @@ function App() {
         onNavegar={handleNavegar}
         usuarioActual={usuarioActual}
         onCerrarSesion={handleCerrarSesion}
+        textoBusqueda={filtroTexto}
+        onBuscar={handleBuscar}
       />
 
       {/* Vistas Dinámicas */}
@@ -238,6 +251,8 @@ function App() {
           onCambiarCategoria={setFiltroCategoria}
           filtroGenero={filtroGenero}
           onCambiarGenero={setFiltroGenero}
+          filtroTexto={filtroTexto}
+          onCambiarTexto={setFiltroTexto}
           onAgregar={handleAgregarAlCarrito}
           onVerDetalle={setProductoSeleccionado}
         />

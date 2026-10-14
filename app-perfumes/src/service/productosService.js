@@ -9,16 +9,32 @@ export const obtenerProductos = () => leerLista(CLAVE);
 // Carga el catálogo: usa lo guardado o, si no hay nada, siembra desde el JSON.
 export const cargarProductos = async () => {
   const guardados = obtenerProductos();
-  if (guardados.length) return guardados;
+
+  
+  if (guardados.length && guardados.every((p) => p.descripcion)) return guardados;
+
   const res = await fetch('/data/productos.json');
   const base = await res.json();
-  const sembrados = base.map((p, i) => ({
-    ...p,
-    stock: p.stock ?? ((i * 7) % 18) + 2, // 2..19, algunos quedan críticos
-    descripcion: p.descripcion || '',
-  }));
-  guardarLista(CLAVE, sembrados);
-  return sembrados;
+  const clave = (p) => `${p.marca}|${p.modelo}`;
+
+
+  if (!guardados.length) {
+    const sembrados = base.map((p, i) => ({
+      ...p,
+      stock: p.stock ?? ((i * 7) % 18) + 2, 
+      descripcion: p.descripcion || '',
+    }));
+    guardarLista(CLAVE, sembrados);
+    return sembrados;
+  }
+
+  // Ya había datos guardados: completa solo las descripciones que faltan
+  const descPorClave = Object.fromEntries(base.map((p) => [clave(p), p.descripcion]));
+  const completados = guardados.map((p) =>
+    p.descripcion ? p : { ...p, descripcion: descPorClave[clave(p)] || '' }
+  );
+  guardarLista(CLAVE, completados);
+  return completados;
 };
 
 export const obtenerProducto = (id) =>
