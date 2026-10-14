@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 
-const VACIO = { marca: '', modelo: '', tipo: '', genero: 'unisex', precio: '', stock: '', volumen: '', imagenes: '', descripcion: '' };
+const VACIO = { marca: '', modelo: '', tipo: '', genero: 'unisex', precio: '', descuento: '', stock: '', volumen: '', imagenes: '', descripcion: '' };
 
 export const validarProducto = (d) => {
   const e = {};
@@ -9,6 +9,8 @@ export const validarProducto = (d) => {
   if (!d.tipo) e.tipo = 'Selecciona una categoría.';
   if (d.precio === '' || !Number.isInteger(Number(d.precio)) || Number(d.precio) <= 0)
     e.precio = 'El precio debe ser un entero mayor a 0.';
+  if (d.descuento !== '' && d.descuento != null && (!Number.isInteger(Number(d.descuento)) || Number(d.descuento) < 0 || Number(d.descuento) > 90))
+    e.descuento = 'El descuento debe ser un entero entre 0 y 90.';
   if (d.stock === '' || !Number.isInteger(Number(d.stock)) || Number(d.stock) < 0)
     e.stock = 'El stock debe ser un entero igual o mayor a 0.';
   if (!d.volumen.trim()) e.volumen = 'El volumen es obligatorio (ej. 100 ml).';
@@ -69,6 +71,7 @@ export function ProductoForm({ inicial, categorias, onGuardar, onCancelar }) {
           </select>
         </div>
         {campo('precio', 'Precio (CLP)', { type: 'number', min: 1 })}
+        {campo('descuento', 'Descuento % (0 = sin oferta)', { type: 'number', min: 0, max: 90 })}
         {campo('stock', 'Stock', { type: 'number', min: 0 })}
         {campo('volumen', 'Volumen', { placeholder: '100 ml' })}
         {campo('imagenes', 'Imagen (ruta o URL)', { placeholder: '/img/arabe/images.jpg' })}

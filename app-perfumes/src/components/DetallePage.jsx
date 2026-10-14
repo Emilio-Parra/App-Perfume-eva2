@@ -1,4 +1,5 @@
 import React from 'react';
+import { enOferta, porcentajeDescuento, precioFinal } from '../utils/precios';
 
 export const DetallePage = ({ producto, onVolver, onAgregar }) => {
   if (!producto) return null;
@@ -54,13 +55,22 @@ export const DetallePage = ({ producto, onVolver, onAgregar }) => {
               <strong>Presentación:</strong> {volumen || '100 ml'}
             </p>
 
-            {descripcion && (
-              <p className="text-secondary my-3">{descripcion}</p>
-            )}
+            <h2 className="h6 fw-bold text-uppercase mt-4 mb-1">Descripción</h2>
+            <p className="text-secondary mb-3">
+              {descripcion || 'Descripción no disponible por el momento.'}
+            </p>
 
             <div className="my-4">
-              <span className="display-6 fw-bold text-dark">
-                ${precio ? precio.toLocaleString('es-CL') : 0}
+              {enOferta(producto) && (
+                <>
+                  <span className="badge bg-danger fs-6 me-2 align-middle">-{porcentajeDescuento(producto)}%</span>
+                  <span className="fs-5 text-muted text-decoration-line-through me-2">
+                    ${precio.toLocaleString('es-CL')}
+                  </span>
+                </>
+              )}
+              <span className={`display-6 fw-bold ${enOferta(producto) ? 'text-danger' : 'text-dark'}`}>
+                ${precioFinal(producto).toLocaleString('es-CL')}
               </span>
             </div>
 

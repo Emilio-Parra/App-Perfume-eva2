@@ -10,29 +10,34 @@ export const obtenerProductos = () => leerLista(CLAVE);
 export const cargarProductos = async () => {
   const guardados = obtenerProductos();
 
-  
-  if (guardados.length && guardados.every((p) => p.descripcion)) return guardados;
+  // Si todo está completo (descripción y descuento) no hace falta volver a leer el JSON
+  if (guardados.length && guardados.every((p) => p.descripcion && p.descuento !== undefined)) return guardados;
 
   const res = await fetch('/data/productos.json');
   const base = await res.json();
   const clave = (p) => `${p.marca}|${p.modelo}`;
 
-
   if (!guardados.length) {
     const sembrados = base.map((p, i) => ({
       ...p,
-      stock: p.stock ?? ((i * 7) % 18) + 2, 
+      stock: p.stock ?? ((i * 7) % 18) + 2,
       descripcion: p.descripcion || '',
+      descuento: p.descuento ?? 0,
     }));
     guardarLista(CLAVE, sembrados);
     return sembrados;
   }
 
-  // Ya había datos guardados: completa solo las descripciones que faltan
-  const descPorClave = Object.fromEntries(base.map((p) => [clave(p), p.descripcion]));
-  const completados = guardados.map((p) =>
-    p.descripcion ? p : { ...p, descripcion: descPorClave[clave(p)] || '' }
-  );
+  // Ya había datos guardados: completa solo la descripción y el descuento que falten
+  const porClave = Object.fromEntries(base.map((p) => [clave(p), p]));
+  const completados = guardados.map((p) => {
+    const b = porClave[clave(p)] || {};
+    return {
+      ...p,
+      descripcion: p.descripcion || b.descripcion || '',
+      descuento: p.descuento ?? b.descuento ?? 0,
+    };
+  });
   guardarLista(CLAVE, completados);
   return completados;
 };

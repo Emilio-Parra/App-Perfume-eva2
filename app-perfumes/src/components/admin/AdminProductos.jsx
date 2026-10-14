@@ -36,7 +36,7 @@ function TablaProductos({ productos, onEditar, onEliminar }) {
               <td><strong>{p.marca}</strong> {p.modelo}<div className="small text-muted">{p.volumen}</div></td>
               <td className="text-capitalize">{p.tipo}</td>
               <td className="text-capitalize">{p.genero}</td>
-              <td className="text-end">{clp(p.precio)}</td>
+              <td className="text-end">{clp(p.precio)}{Number(p.descuento) > 0 && <span className="badge bg-danger ms-1">-{p.descuento}%</span>}</td>
               <td className="text-center"><StockBadge p={p} /></td>
               <td className="text-end text-nowrap">
                 <button className="btn btn-sm btn-outline-primary me-1" onClick={() => onEditar(p.id)}>Editar</button>
