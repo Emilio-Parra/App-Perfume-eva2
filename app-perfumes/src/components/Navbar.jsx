@@ -5,6 +5,9 @@ import { BuscadorNavbar } from './BuscadorNavbar';
 const ENLACES = [
   { pagina: 'inicio', etiqueta: 'Inicio' },
   { pagina: 'catalogo', etiqueta: 'Catálogo' },
+  { pagina: 'ofertas', etiqueta: '🔥 Ofertas' },
+  { pagina: 'nosotros', etiqueta: 'Nosotros' },
+  { pagina: 'blog', etiqueta: 'Blog' },
   { pagina: 'tiendas', etiqueta: 'Tiendas' },
   { pagina: 'contacto', etiqueta: 'Contacto' },
 ];

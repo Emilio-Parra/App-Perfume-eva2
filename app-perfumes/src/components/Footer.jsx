@@ -25,6 +25,7 @@ export const Footer = ({ onNavegar }) => {
             <ul>
               <li><a href="#inicio" onClick={(e) => ir(e, 'inicio')}>Inicio</a></li>
               <li><a href="#catalogo" onClick={(e) => ir(e, 'catalogo')}>Catálogo</a></li>
+              <li><a href="#ofertas" onClick={(e) => ir(e, 'ofertas')}>Ofertas</a></li>
               <li><a href="#arabes" onClick={(e) => ir(e, 'catalogo', 'arabe')}>Árabes</a></li>
               <li><a href="#disenador" onClick={(e) => ir(e, 'catalogo', 'diseñador')}>Diseñador</a></li>
               <li><a href="#nicho" onClick={(e) => ir(e, 'catalogo', 'nicho')}>Nicho</a></li>
@@ -33,6 +34,8 @@ export const Footer = ({ onNavegar }) => {
           <div className="footer-col">
             <h4>Información</h4>
             <ul>
+              <li><a href="#nosotros" onClick={(e) => ir(e, 'nosotros')}>Nosotros</a></li>
+              <li><a href="#blog" onClick={(e) => ir(e, 'blog')}>Blog</a></li>
               <li><a href="#tiendas" onClick={(e) => ir(e, 'tiendas')}>Nuestras Tiendas</a></li>
               <li><a href="#contacto" onClick={(e) => ir(e, 'contacto')}>Contacto</a></li>
               <li><a href="#terminos">Términos y Condiciones</a></li>

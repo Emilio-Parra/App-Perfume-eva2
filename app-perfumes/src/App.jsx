@@ -16,11 +16,19 @@ import { crearPedido, procesarPago } from './service/pedidosService';
 import { cargarProductos, obtenerProductos, descontarStock } from './service/productosService';
 import { asegurarAdmin } from './service/usuariosService';
 import { AdminPage } from './components/admin/AdminPage';
+import { OfertasPage } from './components/OfertasPage';
+import { OfertasDestacadas } from './components/OfertasDestacadas';
+import { NosotrosPage } from './components/NosotrosPage';
+import { BlogPage } from './components/BlogPage';
+import { BlogDetallePage } from './components/BlogDetallePage';
+import { obtenerBlogs, obtenerBlog } from './data/blogs';
+import { precioFinal, enOferta } from './utils/precios';
 
 function App() {
   const [productos, setProductos] = useState([]);
   const [productoSeleccionado, setProductoSeleccionado] = useState(null);
-  // Página visible: inicio | catalogo | carrito | checkout | compra-exitosa | pago-fallido | tiendas | contacto | login | registro
+  const [blogSeleccionado, setBlogSeleccionado] = useState(null); // id del artículo abierto en Blog
+  // Página visible: inicio | catalogo | ofertas | nosotros | blog | carrito | checkout | compra-exitosa | pago-fallido | tiendas | contacto | login | registro
   const [paginaActual, setPaginaActual] = useState('inicio');
 
   // Filtros del catálogo (viven aquí para no perderse al abrir un detalle y volver)
@@ -63,6 +71,7 @@ function App() {
   const handleNavegar = (pagina, categoria = 'todas') => {
     setPaginaActual(pagina);
     setProductoSeleccionado(null);
+    setBlogSeleccionado(null);
     if (pagina === 'catalogo') {
       setFiltroCategoria(categoria);
       setFiltroGenero('todos');
@@ -106,7 +115,8 @@ function App() {
             : item
         );
       }
-      return [...prev, { ...producto, cantidad: 1 }];
+      // En el carrito se guarda el precio ya con descuento: así el total y el pedido cobran lo correcto
+      return [...prev, { ...producto, precioOriginal: producto.precio, precio: precioFinal(producto), cantidad: 1 }];
     });
   };
 
@@ -199,6 +209,14 @@ function App() {
           onVolver={() => setProductoSeleccionado(null)}
           onAgregar={handleAgregarAlCarrito}
         />
+      ) : paginaActual === 'nosotros' ? (
+        <NosotrosPage onIrACatalogo={() => handleNavegar('catalogo')} />
+      ) : paginaActual === 'blog' ? (
+        blogSeleccionado ? (
+          <BlogDetallePage blog={obtenerBlog(blogSeleccionado)} onVolver={() => setBlogSeleccionado(null)} />
+        ) : (
+          <BlogPage blogs={obtenerBlogs()} onVerBlog={setBlogSeleccionado} />
+        )
       ) : paginaActual === 'contacto' ? (
         <ContactoPage />
       ) : paginaActual === 'tiendas' ? (
@@ -243,6 +261,12 @@ function App() {
           procesando={procesandoPago}
           onReintentar={handleReintentarPago}
           onVolverAlCarrito={() => handleNavegar('carrito')}
+        />
+      ) : paginaActual === 'ofertas' ? (
+        <OfertasPage
+          productos={productos}
+          onAgregar={handleAgregarAlCarrito}
+          onVerDetalle={setProductoSeleccionado}
         />
       ) : paginaActual === 'catalogo' ? (
         <CatalogoPage
@@ -302,6 +326,14 @@ function App() {
               </button>
             </div>
           </main>
+
+          {/* Ofertas destacadas en INICIO */}
+          <OfertasDestacadas
+            productos={productos}
+            onAgregar={handleAgregarAlCarrito}
+            onVerDetalle={setProductoSeleccionado}
+            onVerTodas={() => handleNavegar('ofertas')}
+          />
 
           {/* Sección de Video solo en INICIO */}
           <section className="container my-5 text-center">
