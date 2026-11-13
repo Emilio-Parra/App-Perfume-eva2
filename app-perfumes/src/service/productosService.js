@@ -1,92 +1,160 @@
-import { leerLista, guardarLista } from './storage';
-
 const CLAVE = 'productos_perfumes';
-export const STOCK_CRITICO = 5; // stock <= a este valor se considera crítico
+
+// Copia temporal en memoria, no en localStorage
+let cacheProductos = [];
+
+const leerLista = () => cacheProductos;
+
+const guardarLista = (_clave, lista) => {
+  cacheProductos = lista;
+};
+
+
+export const STOCK_CRITICO = 5;
 const STOCK_INICIAL = 20;
 
+// Obtener productos de la copia temporal del frontend
 export const obtenerProductos = () => leerLista(CLAVE);
 
-// Carga el catálogo: usa lo guardado o, si no hay nada, siembra desde el JSON.
-export const cargarProductos = async () => {
-  const guardados = obtenerProductos();
+// Función auxiliar para comunicarse con Spring Boot
+const solicitarAPI = async (ruta, opciones = {}) => {
+  const respuesta = await fetch(ruta, opciones);
 
-  // Si todo está completo (descripción y descuento) no hace falta volver a leer el JSON
-  if (guardados.length && guardados.every((p) => p.descripcion && p.descuento !== undefined)) return guardados;
+  if (!respuesta.ok) {
+    let mensaje = `Error HTTP ${respuesta.status}`;
 
-  const res = await fetch('/data/productos.json');
-  const base = await res.json();
-  const clave = (p) => `${p.marca}|${p.modelo}`;
+    try {
+      const datos = await respuesta.json();
+      mensaje = datos.error || datos.message || mensaje;
+    } catch {
+      // Conservar el mensaje HTTP si no hay respuesta JSON
+    }
 
-  if (!guardados.length) {
-    const sembrados = base.map((p, i) => ({
-      ...p,
-      stock: p.stock ?? ((i * 7) % 18) + 2,
-      descripcion: p.descripcion || '',
-      descuento: p.descuento ?? 0,
-    }));
-    guardarLista(CLAVE, sembrados);
-    return sembrados;
+    throw new Error(mensaje);
   }
 
-  // Ya había datos guardados: completa solo la descripción y el descuento que falten
-  const porClave = Object.fromEntries(base.map((p) => [clave(p), p]));
-  const completados = guardados.map((p) => {
-    const b = porClave[clave(p)] || {};
-    return {
-      ...p,
-      descripcion: p.descripcion || b.descripcion || '',
-      descuento: p.descuento ?? b.descuento ?? 0,
-    };
-  });
-  guardarLista(CLAVE, completados);
-  return completados;
+  if (respuesta.status === 204) {
+    return null;
+  }
+
+  return respuesta.json();
 };
 
-export const obtenerProducto = (id) =>
-  obtenerProductos().find((p) => Number(p.id) === Number(id)) || null;
+// Cargar productos desde Spring Boot y MySQL
+export const cargarProductos = async () => {
+  const productos = await solicitarAPI('/api/productos');
 
-export const crearProducto = (datos) => {
-  const lista = obtenerProductos();
-  const id = (lista.length ? Math.max(...lista.map((p) => Number(p.id))) : 0) + 1;
+  if (!Array.isArray(productos)) {
+    throw new Error('El backend no devolvió una lista de productos');
+  }
+
+  guardarLista(CLAVE, productos);
+
+  return productos;
+};
+
+// Buscar un producto por ID
+export const obtenerProducto = (id) =>
+  obtenerProductos().find(
+    (p) => Number(p.id) === Number(id)
+  ) || null;
+
+// Crear un producto directamente en MySQL
+export const crearProducto = async (datos) => {
   const nuevo = {
     ...datos,
-    id,
     precio: Number(datos.precio),
+    descuento: Number(datos.descuento ?? 0),
     stock: Number(datos.stock ?? STOCK_INICIAL),
   };
-  guardarLista(CLAVE, [...lista, nuevo]);
-  return nuevo;
-};
 
-export const actualizarProducto = (id, cambios) => {
-  let actualizado = null;
-  const lista = obtenerProductos().map((p) => {
-    if (Number(p.id) !== Number(id)) return p;
-    actualizado = {
-      ...p,
-      ...cambios,
-      precio: Number(cambios.precio ?? p.precio),
-      stock: Number(cambios.stock ?? p.stock),
-    };
-    return actualizado;
+  // El ID lo genera MySQL
+  delete nuevo.id;
+
+  const creado = await solicitarAPI('/api/productos', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json; charset=utf-8',
+    },
+    body: JSON.stringify(nuevo),
   });
-  guardarLista(CLAVE, lista);
-  return actualizado;
+
+  // Actualizar la copia local solo si MySQL guardó el producto
+  guardarLista(CLAVE, [...obtenerProductos(), creado]);
+
+  return creado;
 };
 
-export const eliminarProducto = (id) =>
-  guardarLista(CLAVE, obtenerProductos().filter((p) => Number(p.id) !== Number(id)));
+// Actualizar un producto directamente en MySQL
+export const actualizarProducto = async (id, cambios) => {
+  const actual = obtenerProducto(id);
 
-export const esCritico = (p) => Number(p.stock) <= STOCK_CRITICO;
+  if (!actual) {
+    throw new Error('El producto no existe');
+  }
 
-// Descuenta del stock las unidades vendidas (items: [{ id, cantidad }]); nunca baja de 0.
+  const actualizado = {
+    ...actual,
+    ...cambios,
+    precio: Number(cambios.precio ?? actual.precio),
+    descuento: Number(cambios.descuento ?? actual.descuento ?? 0),
+    stock: Number(cambios.stock ?? actual.stock),
+  };
+
+  const guardado = await solicitarAPI(`/api/productos/${id}`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json; charset=utf-8',
+    },
+    body: JSON.stringify(actualizado),
+  });
+
+  guardarLista(
+    CLAVE,
+    obtenerProductos().map((p) =>
+      Number(p.id) === Number(id) ? guardado : p
+    )
+  );
+
+  return guardado;
+};
+
+// Eliminar un producto directamente de MySQL
+export const eliminarProducto = async (id) => {
+  await solicitarAPI(`/api/productos/${id}`, {
+    method: 'DELETE',
+  });
+
+  guardarLista(
+    CLAVE,
+    obtenerProductos().filter(
+      (p) => Number(p.id) !== Number(id)
+    )
+  );
+};
+
+// Comprobar si el stock es crítico
+export const esCritico = (p) =>
+  Number(p.stock) <= STOCK_CRITICO;
+
+// Descontar stock temporalmente en el frontend
+// Lo reemplazaremos al conectar el proceso de compra
 export const descontarStock = (items) => {
-  const vendidos = Object.fromEntries(items.map((i) => [Number(i.id), i.cantidad]));
+  const vendidos = Object.fromEntries(
+    items.map((i) => [Number(i.id), i.cantidad])
+  );
+
   guardarLista(
     CLAVE,
     obtenerProductos().map((p) =>
       vendidos[Number(p.id)]
-        ? { ...p, stock: Math.max(0, Number(p.stock) - vendidos[Number(p.id)]) }
+        ? {
+            ...p,
+            stock: Math.max(
+              0,
+              Number(p.stock) - vendidos[Number(p.id)]
+            ),
+          }
         : p
     )
   );

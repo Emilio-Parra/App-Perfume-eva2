@@ -1,32 +1,93 @@
-import { leerLista, guardarLista } from './storage';
 
-const CLAVE = 'categorias_perfumes';
+const API = '/api/categorias';
+let categoriasCache = [];
 
-export const obtenerCategorias = () => {
-  const guardadas = leerLista(CLAVE);
-  if (guardadas.length) return guardadas;
-  const base = [
-    { id: 1, nombre: 'arabe', descripcion: 'Fragancias árabes, intensas y duraderas' },
-    { id: 2, nombre: 'nicho', descripcion: 'Perfumería de nicho y ediciones limitadas' },
-    { id: 3, nombre: 'diseñador', descripcion: 'Casas de moda y perfumería de diseñador' },
-  ];
-  guardarLista(CLAVE, base);
-  return base;
+const comprobarRespuesta = async (respuesta) => {
+  if (respuesta.ok) return;
+
+  const cuerpo = await respuesta.json().catch(() => null);
+
+  throw new Error(
+    cuerpo?.error || `Error HTTP ${respuesta.status}`
+  );
 };
 
-export const crearCategoria = ({ nombre, descripcion }) => {
-  const lista = obtenerCategorias();
-  const id = (lista.length ? Math.max(...lista.map((c) => c.id)) : 0) + 1;
-  const nueva = { id, nombre: nombre.trim(), descripcion: (descripcion || '').trim() };
-  guardarLista(CLAVE, [...lista, nueva]);
+// Obtener las categorías cargadas
+export const obtenerCategorias = () => [...categoriasCache];
+
+// Consultar las categorías desde MySQL
+export const cargarCategorias = async () => {
+  const respuesta = await fetch(API);
+  await comprobarRespuesta(respuesta);
+
+  const categorias = await respuesta.json();
+
+  if (!Array.isArray(categorias)) {
+    throw new Error(
+      'El servidor no devolvió una lista de categorías.'
+    );
+  }
+
+  categoriasCache = categorias;
+  return obtenerCategorias();
+};
+
+// Crear una categoría en MySQL
+export const crearCategoria = async ({ nombre, descripcion }) => {
+  const respuesta = await fetch(API, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      nombre: nombre.trim(),
+      descripcion: (descripcion || '').trim()
+    })
+  });
+
+  await comprobarRespuesta(respuesta);
+
+  const nueva = await respuesta.json();
+  categoriasCache = [...categoriasCache, nueva];
+
   return nueva;
 };
 
-export const actualizarCategoria = (id, cambios) =>
-  guardarLista(
-    CLAVE,
-    obtenerCategorias().map((c) => (c.id === id ? { ...c, ...cambios } : c))
+// Actualizar una categoría en MySQL
+export const actualizarCategoria = async (id, cambios) => {
+  const respuesta = await fetch(`${API}/${id}`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      nombre: cambios.nombre.trim(),
+      descripcion: (cambios.descripcion || '').trim()
+    })
+  });
+
+  await comprobarRespuesta(respuesta);
+
+  const actualizada = await respuesta.json();
+
+  categoriasCache = categoriasCache.map((categoria) =>
+    Number(categoria.id) === Number(id)
+      ? actualizada
+      : categoria
   );
 
-export const eliminarCategoria = (id) =>
-  guardarLista(CLAVE, obtenerCategorias().filter((c) => c.id !== id));
+  return actualizada;
+};
+
+// Eliminar una categoría de MySQL
+export const eliminarCategoria = async (id) => {
+  const respuesta = await fetch(`${API}/${id}`, {
+    method: 'DELETE'
+  });
+
+  await comprobarRespuesta(respuesta);
+
+  categoriasCache = categoriasCache.filter(
+    (categoria) => Number(categoria.id) !== Number(id)
+  );
+};

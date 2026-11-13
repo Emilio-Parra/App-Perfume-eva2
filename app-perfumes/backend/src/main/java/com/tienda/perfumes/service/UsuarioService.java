@@ -106,4 +106,11 @@ public class UsuarioService {
                 correo.trim().toLowerCase(Locale.ROOT)
         );
     }
+
+
+    // Contar los clientes registrados en MySQL
+    public long contarClientes() {
+        return usuarioRepository.countByRol("cliente");
+    }
+
 }

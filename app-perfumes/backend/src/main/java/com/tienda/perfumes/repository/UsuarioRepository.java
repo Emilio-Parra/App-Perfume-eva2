@@ -19,4 +19,7 @@ public interface UsuarioRepository extends JpaRepository<Usuario, Long> {
 
     // Comprobar si ya existe un RUT
     boolean existsByRut(String rut);
+
+    // Contar usuarios según su rol
+    long countByRol(String rol);
 }

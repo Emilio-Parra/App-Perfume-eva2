@@ -1,97 +1,182 @@
-// Fuente de datos simulada para los pedidos (persistencia en localStorage).
-// Incluye el CRUD básico (crear, leer, actualizar, eliminar) y la simulación del pago.
 
-const CLAVE = 'pedidos_perfumes';
+// Copia temporal solo durante la navegación. Los pedidos se guardan en MySQL.
+let pedidosCache = [];
 
-// Probabilidad de que el pago simulado salga bien: 1 = siempre exitoso, 0 = siempre fallido.
+// La simulación del pago ahora la realiza Spring Boot
 export const PROBABILIDAD_EXITO = 0.7;
-const DEMORA_PAGO_MS = 1500;
 
-const leer = () => {
-  try {
-    const datos = JSON.parse(localStorage.getItem(CLAVE) || '[]');
-    return Array.isArray(datos) ? datos : [];
-  } catch {
-    return [];
-  }
-};
+const leer = () => [...pedidosCache];
+const guardar = (pedidos) => { pedidosCache = pedidos; };
 
-const guardar = (pedidos) => localStorage.setItem(CLAVE, JSON.stringify(pedidos));
-
+// Calcular el total de los productos del carrito
 export const calcularTotal = (items) =>
-  items.reduce((acc, item) => acc + item.precio * item.cantidad, 0);
+  items.reduce(
+    (acc, item) => acc + item.precio * item.cantidad,
+    0
+  );
 
-// Número de pedido: AAAAMMDD + correlativo del día (ej. 2026101001)
-const generarNumero = (existentes) => {
-  const hoy = new Date();
-  const prefijo = `${hoy.getFullYear()}${String(hoy.getMonth() + 1).padStart(2, '0')}${String(hoy.getDate()).padStart(2, '0')}`;
-  const correlativos = existentes
-    .filter((p) => p.id.startsWith(prefijo))
-    .map((p) => Number(p.id.slice(prefijo.length)));
-  const siguiente = (correlativos.length ? Math.max(...correlativos) : 0) + 1;
-  return `${prefijo}${String(siguiente).padStart(2, '0')}`;
+// Función auxiliar para comunicarse con Spring Boot
+const solicitarAPI = async (ruta, opciones = {}) => {
+  const respuesta = await fetch(ruta, opciones);
+
+  const datos = await respuesta
+    .json()
+    .catch(() => null);
+
+  if (!respuesta.ok) {
+    throw new Error(
+      datos?.error ||
+      datos?.message ||
+      `Error HTTP ${respuesta.status}`
+    );
+  }
+
+  return datos;
 };
 
-// ---------- CRUD ----------
+// ---------- CONSULTAR PEDIDOS ----------
 
 export const obtenerPedidos = () => leer();
 
-export const obtenerPedido = (id) => leer().find((p) => p.id === id) || null;
+export const obtenerPedido = (id) =>
+  leer().find(
+    (p) => String(p.id) === String(id)
+  ) || null;
 
-export const crearPedido = ({ cliente, envio, items }) => {
-  const pedidos = leer();
+// ---------- CREAR PEDIDO EN MYSQL ----------
+
+export const crearPedido = async ({ cliente, envio, items }) => {
+
+  // Obtener el usuario que inició sesión
+  const usuarioActual = JSON.parse(
+    localStorage.getItem('usuario_actual') || 'null'
+  );
+
+  if (!usuarioActual?.id) {
+    throw new Error(
+      'Debes iniciar sesión con una cuenta registrada para comprar.'
+    );
+  }
+
+  if (!items || items.length === 0) {
+    throw new Error('El carrito está vacío.');
+  }
+
+  // Datos que espera CrearPedidoRequest.java
+  const datosPedido = {
+    usuarioId: Number(usuarioActual.id),
+    cliente,
+    envio,
+
+    items: items.map((item) => ({
+      id: Number(item.id),
+      cantidad: Number(item.cantidad)
+    }))
+  };
+
+  // Crear el pedido directamente en Spring Boot
+  const respuesta = await solicitarAPI('/api/pedidos', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json; charset=utf-8'
+    },
+    body: JSON.stringify(datosPedido)
+  });
+
+  // Completar los datos necesarios para las pantallas de React
   const pedido = {
-    id: generarNumero(pedidos),
-    codigo: `ORDER${Math.floor(10000 + Math.random() * 90000)}`,
-    fecha: new Date().toISOString(),
-    estado: 'pendiente', // pendiente | pagado | fallido
+    id: respuesta.id,
+    codigo: respuesta.codigo,
+    fecha: respuesta.fecha,
+    estado: respuesta.estado,
     intentos: 0,
     cliente,
     envio,
-    // Se guarda una copia de los productos para que el pedido no cambie si el catálogo cambia
-    items: items.map(({ id, marca, modelo, nombre, imagenes, precio, cantidad }) => ({
-      id,
-      marca,
-      modelo: modelo || nombre,
-      imagenes,
-      precio,
-      cantidad,
+
+    items: items.map((item) => ({
+      id: item.id,
+      marca: item.marca,
+      modelo: item.modelo || item.nombre,
+      imagenes: item.imagenes,
+      precio: item.precio,
+      cantidad: item.cantidad
     })),
-    total: calcularTotal(items),
+
+    // Usar el total calculado por el backend
+    total: respuesta.total
   };
-  guardar([...pedidos, pedido]);
+
+  // Conservar datos temporalmente para la boleta y posibles reintentos
+  guardar([...leer(), pedido]);
+
   return pedido;
 };
 
+// ---------- ACTUALIZAR PEDIDO LOCAL ----------
+
+// Copia temporal durante esta sesión de React. La administración real consulta MySQL.
 export const actualizarPedido = (id, cambios) => {
   let actualizado = null;
+
   const pedidos = leer().map((p) => {
-    if (p.id !== id) return p;
-    actualizado = { ...p, ...cambios };
+    if (String(p.id) !== String(id)) return p;
+
+    actualizado = {
+      ...p,
+      ...cambios
+    };
+
     return actualizado;
   });
+
   guardar(pedidos);
+
   return actualizado;
 };
 
+// ---------- ELIMINAR PEDIDO LOCAL ----------
+
+// Elimina solo la copia temporal. Las órdenes reales están en MySQL.
 export const eliminarPedido = (id) => {
-  guardar(leer().filter((p) => p.id !== id));
+  guardar(
+    leer().filter(
+      (p) => String(p.id) !== String(id)
+    )
+  );
 };
 
-// ---------- Pago simulado ----------
+// ---------- PROCESAR PAGO EN MYSQL ----------
 
-// Simula el cobro: espera un momento y marca el pedido como pagado o fallido.
-// Devuelve una promesa con el pedido ya actualizado.
-export const procesarPago = (id) =>
-  new Promise((resolve) => {
-    setTimeout(() => {
-      const pedido = obtenerPedido(id);
-      const exito = Math.random() < PROBABILIDAD_EXITO;
-      resolve(
-        actualizarPedido(id, {
-          estado: exito ? 'pagado' : 'fallido',
-          intentos: (pedido?.intentos || 0) + 1,
-        })
-      );
-    }, DEMORA_PAGO_MS);
-  });
+export const procesarPago = async (id) => {
+
+  const pedidoAnterior = obtenerPedido(id);
+
+  if (!pedidoAnterior) {
+    throw new Error('No se encontró el pedido.');
+  }
+
+  // Spring Boot simula el pago y actualiza MySQL
+  const respuesta = await solicitarAPI(
+    `/api/pedidos/${id}/pago`,
+    {
+      method: 'POST'
+    }
+  );
+
+  // Mantener los datos de cliente, envío y productos
+  const pedidoActualizado = {
+    ...pedidoAnterior,
+    ...respuesta
+  };
+
+  // Actualizar la copia local con el resultado del backend
+  guardar(
+    leer().map((p) =>
+      String(p.id) === String(id)
+        ? pedidoActualizado
+        : p
+    )
+  );
+
+  return pedidoActualizado;
+};

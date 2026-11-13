@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { esCritico } from '../../service/productosService';
 
 const MODULOS = [
@@ -13,10 +13,45 @@ const MODULOS = [
 ];
 
 export function AdminDashboard({ productos, pedidos, usuarios, onIr, onIrATienda }) {
+  const [totalClientes, setTotalClientes] = useState(null);
+  const [errorClientes, setErrorClientes] = useState(false);
+
+  // Consulta solo el total de clientes, sin descargar datos personales.
+  useEffect(() => {
+    let activo = true;
+
+    const cargarTotalClientes = async () => {
+      try {
+        const respuesta = await fetch('/api/usuarios/total-clientes');
+        if (!respuesta.ok) throw new Error(`HTTP ${respuesta.status}`);
+
+        const datos = await respuesta.json();
+        const total = Number(datos.totalClientes);
+        if (!Number.isInteger(total) || total < 0) {
+          throw new Error('Cantidad de clientes no válida');
+        }
+
+        if (activo) {
+          setTotalClientes(total);
+          setErrorClientes(false);
+        }
+      } catch (error) {
+        if (activo) {
+          setTotalClientes(null);
+          setErrorClientes(true);
+        }
+      }
+    };
+
+    cargarTotalClientes();
+    return () => { activo = false; };
+  }, []);
+
   const compras = pedidos.filter((p) => p.estado === 'pagado');
   const stockTotal = productos.reduce((acc, p) => acc + Number(p.stock || 0), 0);
   const criticos = productos.filter(esCritico).length;
-  const clientes = usuarios.filter((u) => u.rol !== 'admin').length;
+  const administradoresLocales = usuarios.filter((u) => u.rol === 'admin').length;
+  const usuariosTotales = totalClientes === null ? '—' : totalClientes + administradoresLocales;
 
   const abrir = (vista) => (vista === 'tienda' ? onIrATienda() : onIr(vista));
 
@@ -48,8 +83,14 @@ export function AdminDashboard({ productos, pedidos, usuarios, onIr, onIrATienda
           <div className="card bg-warning border-0 h-100 shadow-sm">
             <div className="card-body">
               <div className="small">👥 Usuarios</div>
-              <div className="display-6 fw-bold">{usuarios.length}</div>
-              <div className="small mt-2">{clientes} clientes · {usuarios.length - clientes} admin</div>
+              <div className="display-6 fw-bold">{usuariosTotales}</div>
+              <div className="small mt-2">
+                {errorClientes
+                  ? 'No se pudo consultar el total de clientes en MySQL'
+                  : totalClientes === null
+                    ? 'Consultando clientes en MySQL...'
+                    : `${totalClientes} clientes (MySQL) · ${administradoresLocales} admin (local)`}
+              </div>
             </div>
           </div>
         </div>

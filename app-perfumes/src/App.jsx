@@ -13,7 +13,7 @@ import TiendasPage from './components/TiendasPage';
 import { LoginPage } from './components/LoginPage';
 import { RegistroPage } from './components/RegistroPage';
 import { crearPedido, procesarPago } from './service/pedidosService';
-import { cargarProductos, obtenerProductos, descontarStock } from './service/productosService';
+import { cargarProductos, obtenerProductos } from './service/productosService';
 import { asegurarAdmin } from './service/usuariosService';
 import { AdminPage } from './components/admin/AdminPage';
 import { OfertasPage } from './components/OfertasPage';
@@ -99,7 +99,31 @@ function App() {
     setUsuarioActual(usuario);
   };
 
-  const handleCerrarSesion = () => {
+  // Cerrar la sesión de Spring Boot (cliente o administrador)
+  // antes de eliminar la sesión local de React.
+  const handleCerrarSesion = async () => {
+    if (usuarioActual) {
+      const rutaLogout = usuarioActual.rol === 'admin'
+        ? '/api/admin/logout'
+        : '/api/usuarios/logout';
+
+      try {
+        const respuesta = await fetch(rutaLogout, {
+          method: 'POST',
+          credentials: 'same-origin'
+        });
+
+        // Si la sesión expiró en el servidor, también se puede limpiar React.
+        if (!respuesta.ok && respuesta.status !== 401) {
+          throw new Error(`HTTP ${respuesta.status}`);
+        }
+      } catch (error) {
+        console.error('No se pudo cerrar la sesión en el backend:', error);
+        window.alert('No se pudo confirmar el cierre de sesión con el servidor. Inténtalo nuevamente.');
+        return;
+      }
+    }
+
     localStorage.removeItem('usuario_actual');
     setUsuarioActual(null);
     setPaginaActual('inicio');
@@ -138,33 +162,62 @@ function App() {
   };
 
   // ---------- Pago ----------
-  // Cobra el pedido y muestra la vista de éxito o de error según el resultado.
-  // El carrito solo se vacía si el pago fue exitoso.
+  // El backend registra el pedido, simula el pago y descuenta el stock.
+  // React solo actualiza el carrito y las pantallas según la respuesta.
   const cobrarPedido = async (pedido) => {
     setProcesandoPago(true);
-    const resultado = await procesarPago(pedido.id);
-    setProcesandoPago(false);
-    setPedidoActual(resultado);
 
-    if (resultado.estado === 'pagado') {
-      descontarStock(resultado.items);
-      recargarProductos();
-      setCarrito([]);
-      setPaginaActual('compra-exitosa');
-    } else {
+    try {
+      const resultado = await procesarPago(pedido.id);
+      setPedidoActual(resultado);
+
+      if (resultado.estado === 'pagado') {
+        // El descuento de stock ya fue realizado por Spring Boot.
+        setCarrito([]);
+        setPaginaActual('compra-exitosa');
+
+        // Consultar el stock actualizado desde MySQL.
+        try {
+          const catalogoActualizado = await cargarProductos();
+          setProductos(catalogoActualizado);
+        } catch (error) {
+          // Un error al actualizar el catálogo NO invalida un pago confirmado.
+          console.error('No se pudo actualizar el catálogo:', error);
+        }
+      } else {
+        setPaginaActual('pago-fallido');
+      }
+    } catch (error) {
+      console.error('No se pudo confirmar el pago:', error);
+      setPedidoActual(pedido);
       setPaginaActual('pago-fallido');
+      window.alert(
+        'No se pudo confirmar el estado del pago: ' + error.message +
+        '. Antes de reintentar, verifica el estado del pedido en MySQL.'
+      );
+    } finally {
+      setProcesandoPago(false);
     }
   };
 
-  // Checkout: crea el pedido con los datos del formulario y lo cobra
-  const handlePagar = ({ cliente, envio }) => {
+  // Checkout: espera que Spring Boot cree el pedido antes de cobrarlo.
+  const handlePagar = async ({ cliente, envio }) => {
     if (procesandoPago) return;
-    const pedido = crearPedido({ cliente, envio, items: carrito });
-    setPedidoActual(pedido);
-    cobrarPedido(pedido);
+    setProcesandoPago(true);
+
+    try {
+      const pedido = await crearPedido({ cliente, envio, items: carrito });
+      setPedidoActual(pedido);
+      await cobrarPedido(pedido);
+    } catch (error) {
+      console.error('No se pudo crear el pedido:', error);
+      window.alert('No se pudo crear el pedido: ' + error.message);
+    } finally {
+      setProcesandoPago(false);
+    }
   };
 
-  // "Volver a realizar el pago": reintenta el mismo pedido (mismo número)
+  // Si el pago falla, reintenta el mismo pedido sin crear otro.
   const handleReintentarPago = () => {
     if (procesandoPago || !pedidoActual) return;
     cobrarPedido(pedidoActual);

@@ -53,7 +53,9 @@ export function AdminUsuarioFormulario({ usuario, error, onGuardar, onCancelar }
 
 export function AdminHistorial({ usuario, pedidos, onVerBoleta, onVolver }) {
   if (!usuario) return <p className="text-muted">El usuario no existe.</p>;
-  const propios = pedidos.filter((p) => p.cliente.correo === usuario.correo);
+  const propios = pedidos.filter((p) =>
+    String(p.usuarioId) === String(usuario.id) || p.cliente?.correo === usuario.correo
+  );
   const pagados = propios.filter((p) => p.estado === 'pagado');
   return (
     <>
