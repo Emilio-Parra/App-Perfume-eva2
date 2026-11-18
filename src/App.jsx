@@ -23,6 +23,7 @@ import { BlogPage } from './components/BlogPage';
 import { BlogDetallePage } from './components/BlogDetallePage';
 import { obtenerBlogs, obtenerBlog } from './data/blogs';
 import { precioFinal, enOferta } from './utils/precios';
+import { EVENTO_SESION_EXPIRADA } from './service/authFetch';
 
 function App() {
   const [productos, setProductos] = useState([]);
@@ -56,6 +57,17 @@ function App() {
     cargarProductos()
       .then((data) => setProductos(data))
       .catch((err) => console.error('Error cargando los productos:', err));
+  }, []);
+
+  // Si el token JWT venció (el backend respondió 401), cerrar la sesión en React
+  useEffect(() => {
+    const alExpirar = () => {
+      setUsuarioActual(null);
+      setPaginaActual('login');
+      window.alert('Tu sesión expiró. Inicia sesión nuevamente.');
+    };
+    window.addEventListener(EVENTO_SESION_EXPIRADA, alExpirar);
+    return () => window.removeEventListener(EVENTO_SESION_EXPIRADA, alExpirar);
   }, []);
 
   // El panel admin modifica los productos: se vuelve a leer el catálogo para la tienda
@@ -99,8 +111,8 @@ function App() {
     setUsuarioActual(usuario);
   };
 
-  // Cerrar la sesión de Spring Boot (cliente o administrador)
-  // antes de eliminar la sesión local de React.
+  // Cerrar sesión: con JWT basta con borrar el token guardado en el navegador.
+  // Igual se avisa al backend para mantener el registro del cierre.
   const handleCerrarSesion = async () => {
     if (usuarioActual) {
       const rutaLogout = usuarioActual.rol === 'admin'
@@ -109,8 +121,7 @@ function App() {
 
       try {
         const respuesta = await fetch(rutaLogout, {
-          method: 'POST',
-          credentials: 'same-origin'
+          method: 'POST'
         });
 
         // Si la sesión expiró en el servidor, también se puede limpiar React.

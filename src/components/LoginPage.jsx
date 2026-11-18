@@ -84,7 +84,7 @@ export function LoginPage({ onLoginSuccess, onIrARegistro }) {
         return;
       }
 
-      if (!resultado || !resultado.id) {
+      if (!resultado || !resultado.id || !resultado.token) {
         setErrors({
           general: 'El servidor no devolvió una cuenta válida.'
         });
@@ -102,9 +102,10 @@ export function LoginPage({ onLoginSuccess, onIrARegistro }) {
       // que pudiera quedar en el estado o en el navegador.
       let usuarioEncontrado = resultado;
       if (esAdministrador) {
+        // La sesión todavía no está guardada: se envía el token recién recibido
         const respuestaPerfil = await fetch(`/api/admin/perfil?actualizar=${Date.now()}`, {
-          credentials: 'same-origin',
-          cache: 'no-store'
+          cache: 'no-store',
+          headers: { Authorization: `Bearer ${resultado.token}` }
         });
         const perfil = await respuestaPerfil.json().catch(() => null);
         if (!respuestaPerfil.ok || perfil?.rol !== 'admin' || !perfil?.id) {
@@ -114,7 +115,7 @@ export function LoginPage({ onLoginSuccess, onIrARegistro }) {
         usuarioEncontrado = { ...resultado, ...perfil };
       }
 
-      // Guardar los datos de la sesión actual
+      // Guardar los datos de la sesión actual (incluye el token JWT)
       localStorage.setItem(
         'usuario_actual',
         JSON.stringify(usuarioEncontrado)
