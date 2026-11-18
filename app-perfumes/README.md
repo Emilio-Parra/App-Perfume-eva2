@@ -1,32 +1,44 @@
-# Perfumes Store
+# Perfumes Store — Frontend
 
-Aplicación web de una tienda de perfumes desarrollada como proyecto de **Fullstack 2**. Incluye catálogo de productos, cuentas de clientes, carrito de compras, pedidos y un panel de administración.
+Frontend de **Perfumes Store**, tienda de perfumes desarrollada como proyecto académico para la asignatura **Fullstack 2**. Permite consultar el catálogo, filtrar productos, registrarse, iniciar sesión, comprar de forma simulada y utilizar un panel de administración.
 
-El frontend está desarrollado con **React + Vite**, el backend con **Java + Spring Boot**, y los datos se almacenan en **MySQL**.
+Este repositorio contiene **solo el frontend**, desarrollado con **React, Vite, JavaScript y Bootstrap**. El backend y la base de datos se trabajan por separado con **Spring Boot y MySQL**.
 
-> **Importante:** proyecto académico. El pago es **simulado** y los comprobantes de compra **no son boletas tributarias del SII**.
-
-## 1. Tecnologías
-
-| Parte | Tecnología |
+| Proyecto | Enlace |
 | --- | --- |
-| Frontend | React, Vite, JavaScript, Bootstrap |
-| Backend | Java 21 o superior, Spring Boot, Maven Wrapper |
-| Base de datos | MySQL |
-| Persistencia | Spring Data JPA / Hibernate |
-| Comunicación | API REST (`/api/...`) |
+| **Frontend (este repositorio)** | https://github.com/Emilio-Parra/App-Perfume-eva2 |
+| **Backend** | https://github.com/Emilio-Parra/App-Perfume-Backend |
+| **Página local** | http://localhost:5173 |
+| **API local para comprobar productos** | http://localhost:8080/api/v1/productos |
 
-## 2. Requisitos para ejecutar el proyecto
+> **Importante:** es un proyecto académico. Las compras y los pagos son **simulados**; los comprobantes no son boletas tributarias del SII.
 
-Antes de empezar, instalar:
+## 1. ¿Qué tecnologías usamos?
 
-- **Git**, para descargar y actualizar el repositorio.
-- **Node.js 22 o superior** y npm, para el frontend.
-- **JDK 21 o superior**, para el backend.
-- **MySQL Server** y, opcionalmente, **MySQL Workbench**.
-- **Visual Studio Code** u otro editor.
+| Componente | Tecnología | ¿Para qué sirve? |
+| --- | --- | --- |
+| Interfaz | React 19 + JavaScript | Construir las pantallas de la tienda |
+| Entorno de desarrollo | Vite 8 | Iniciar la página y compilar el frontend |
+| Estilos | Bootstrap 5 + React Bootstrap | Diseño y componentes visuales |
+| Navegación | React Router | Cambiar entre las vistas |
+| Comunicación | API REST versionada (`/api/v1/...`) | Obtener y enviar datos al backend |
+| Servidor | Java 21+ y Spring Boot | Procesar usuarios, productos, pedidos y administración |
+| Base de datos | MySQL | Guardar productos, categorías, cuentas y compras |
 
-Para verificar las instalaciones desde una terminal:
+**El frontend no se conecta directamente a MySQL.** Se comunica con Spring Boot, y Spring Boot es quien consulta o actualiza la base de datos.
+
+## 2. Requisitos para usarlo en los PC del instituto
+
+Necesitamos:
+
+- **Node.js 22.12 o superior** y npm para el frontend (requisito de Vite 8 según el `package-lock.json`).
+- **Java JDK 21 o superior** para el backend.
+- **MySQL Server** y **MySQL Workbench** para la base de datos.
+- **Git** para clonar y actualizar los repositorios.
+- **Visual Studio Code** para abrir los proyectos.
+- Internet al menos durante la primera instalación de dependencias.
+
+Comprobar desde una terminal de PowerShell:
 
 ```powershell
 node -v
@@ -35,188 +47,331 @@ java -version
 git --version
 ```
 
-> El proyecto incluye `mvnw.cmd` / `mvnw`, así que no es obligatorio instalar Maven por separado.
+> En los PC del instituto, MySQL Workbench normalmente permite entrar a la conexión local con `root` sin pedir contraseña. **Eso no significa que el usuario `tienda_app` tampoco tenga contraseña**: configuraremos su propia clave.
 
-## 3. Descargar el proyecto
+## 3. Descargar o abrir los dos repositorios
 
-Clonar el repositorio desde GitHub:
+Si ya clonaron ambos proyectos, **no es necesario clonarlos otra vez**. Basta con abrir las carpetas correctas en dos ventanas de VS Code.
+
+Si parten de cero, pueden descargarlos con:
 
 ```powershell
-git clone URL_DEL_REPOSITORIO
+git clone https://github.com/Emilio-Parra/App-Perfume-eva2.git
+git clone https://github.com/Emilio-Parra/App-Perfume-Backend.git
 ```
 
-Luego abrir la carpeta del proyecto (la que contiene `package.json`, `src/` y `backend/`).
+Las carpetas quedan separadas, por ejemplo:
 
-> Reemplazar `URL_DEL_REPOSITORIO` por la URL real del repositorio colaborativo. No usar literalmente ese texto.
+```text
+Downloads/
+├── App-Perfume-eva2/
+│   └── app-perfumes/          # Aquí está package.json: FRONTEND
+└── App-Perfume-Backend/      # Aquí están pom.xml y mvnw.cmd: BACKEND
+```
 
-## 4. Preparar MySQL
+**Ojo:** para ejecutar `npm`, se debe abrir **`App-Perfume-eva2/app-perfumes`**, no la carpeta exterior `App-Perfume-eva2`.
 
-1. Iniciar MySQL Server.
-2. Abrir MySQL Workbench o una consola de MySQL.
-3. Crear la base de datos:
+## 4. Primera vez: preparar MySQL Workbench
+
+Este paso se realiza **una sola vez por instalación local de MySQL**. Es necesario para que Spring Boot se conecte; después no hay que importar los perfumes manualmente.
+
+### A. Entrar con `root` y crear la base de datos
+
+1. Abrir **MySQL Workbench**.
+2. Entrar en la conexión existente, normalmente **Local instance MySQL80**, usando `root`. En los computadores del instituto suele entrar sin pedir contraseña.
+3. Abrir una pestaña SQL (`SQL +`).
+4. Copiar y ejecutar **todo** lo siguiente con el botón del rayo:
 
 ```sql
 CREATE DATABASE IF NOT EXISTS tienda_perfumes
-  CHARACTER SET utf8mb4
-  COLLATE utf8mb4_unicode_ci;
+CHARACTER SET utf8mb4
+COLLATE utf8mb4_unicode_ci;
+
+CREATE USER IF NOT EXISTS 'tienda_app'@'localhost'
+IDENTIFIED BY 'Root1234';
+
+ALTER USER 'tienda_app'@'localhost'
+IDENTIFIED BY 'Root1234';
+
+GRANT ALL PRIVILEGES ON tienda_perfumes.*
+TO 'tienda_app'@'localhost';
 ```
 
-El backend usa `spring.jpa.hibernate.ddl-auto=update`, por lo que **Hibernate puede crear o actualizar las tablas al iniciar**. Esto **no importa automáticamente los productos, usuarios ni pedidos** de la base de datos de otra persona.
+5. Actualizar **SCHEMAS** y verificar que aparezca **`tienda_perfumes`**.
 
-Cada integrante tiene su propia base de datos local. Si necesitan trabajar con el catálogo de ejemplo y las ventas existentes, deben compartir e importar un **respaldo SQL de prueba**, sin contraseñas ni datos personales reales. Si no hay respaldo, pueden crear productos y registrar clientes desde la aplicación.
+Este SQL crea una cuenta MySQL de práctica llamada `tienda_app`. **`Root1234` es la contraseña de esa cuenta, no la de `root`**. La instrucción `ALTER USER` vuelve a configurar su contraseña si ya existía, así que debe utilizarse solo en la instalación local de práctica.
 
-## 5. Configurar el backend
+### B. Crear la conexión `Tienda Perfumes`
 
-En `backend/src/main/resources/application.properties` deben estar estas configuraciones. **Si el archivo no existe en un clon nuevo, créalo**. Si ya existe con usuario o contraseña escritos directamente, reemplazar esos valores por los marcadores de entorno del ejemplo:
+1. Volver al inicio de Workbench con el ícono de la casa.
+2. Presionar **`+`** en **MySQL Connections**.
+3. Completar:
 
-```properties
-spring.application.name=perfumes
+| Campo | Valor |
+| --- | --- |
+| Connection Name | `Tienda Perfumes` |
+| Connection Method | `Standard (TCP/IP)` |
+| Hostname | `127.0.0.1` |
+| Port | `3306` |
+| Username | `tienda_app` |
+| Password | `Root1234` (usar **Store in Vault...** o introducirla cuando la pida) |
+| Default Schema | `tienda_perfumes` |
 
-# Base de datos
-spring.datasource.url=jdbc:mysql://127.0.0.1:3306/tienda_perfumes
-spring.datasource.username=${DB_USERNAME:root}
-spring.datasource.password=${DB_PASSWORD:}
+4. Presionar **Test Connection**. Si todo está bien, aparecerá `Successfully made the MySQL connection`.
+5. Guardar y abrir **Tienda Perfumes**.
 
-# JPA
-spring.jpa.hibernate.ddl-auto=update
-spring.jpa.show-sql=true
+**No creen las tablas manualmente ni importen el archivo SQL:** eso lo hace el backend al iniciarse por primera vez.
 
-# Servidor
-server.port=8080
+## 5. Iniciar el backend (antes que el frontend)
 
-# Subida de imágenes de productos
-spring.servlet.multipart.max-file-size=5MB
-spring.servlet.multipart.max-request-size=6MB
-app.imagenes.directorio=./uploads/productos
-```
+Abrir una primera ventana de VS Code en la carpeta **`App-Perfume-Backend`**, la que contiene `pom.xml`, `mvnw.cmd`, `src` e `iniciar-backend.ps1`.
 
-**No publicar contraseñas reales en GitHub.** Las propiedades `DB_USERNAME` y `DB_PASSWORD` permiten configurar las credenciales desde variables de entorno. Las variables se utilizarán solo si las propiedades hacen referencia a ellas como en el ejemplo.
-
-### Ejecutar el backend (Windows / PowerShell)
-
-Abrir una terminal en la raíz de `app-perfumes` y ejecutar:
+Abrir **Terminal → New Terminal** y ejecutar:
 
 ```powershell
-cd backend
-
-# Configurar con los datos locales de MySQL
-$env:DB_USERNAME = "root"
-$env:DB_PASSWORD = "TU_CLAVE_LOCAL"
-
-# Solo si se quiere crear una cuenta administradora inicial
-$env:ADMIN_EMAIL = "admin@duoc.cl"
-$env:ADMIN_PASSWORD = "TU_CLAVE_ADMIN_LOCAL"
-
-.\mvnw.cmd spring-boot:run
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\iniciar-backend.ps1
 ```
 
-Si MySQL usa contraseña vacía, configurar `DB_PASSWORD` como una cadena vacía. Si su usuario MySQL es distinto de `root`, cambiar `DB_USERNAME`.
+Cuando aparezcan las preguntas, utilizar estas respuestas **en la primera ejecución de práctica**:
 
-Cuando aparezca `Started ...`, el backend estará disponible en **http://localhost:8080**. **Dejar esta terminal abierta**.
+| Pregunta del script | Qué ingresar |
+| --- | --- |
+| `Clave MySQL de tienda_app` | `Root1234` |
+| `Clave inicial del administrador` | `Root1234` |
 
-En macOS/Linux, desde `backend/`, utilizar `./mvnw spring-boot:run` y exportar las variables de entorno con `export`.
+**Sí: durante el primer inicio se escribe `Root1234` en ambas preguntas.** La primera corresponde a MySQL y la segunda crea la cuenta de administrador de la tienda **solo si todavía no existe**. Después pueden iniciar sesión como administrador con:
 
-> `ADMIN_EMAIL` y `ADMIN_PASSWORD` se utilizan únicamente para **crear el administrador inicial si todavía no existe**. No cambian la contraseña de una cuenta ya creada. No subir credenciales administrativas al repositorio.
+- **Correo:** `admin@duoc.cl`
+- **Contraseña inicial de práctica:** `Root1234`
 
-## 6. Ejecutar el frontend
+En los siguientes inicios, si el administrador **ya existe en esa misma base de datos**, pueden dejar vacía la segunda pregunta y presionar Enter. Si la tabla `administradores` está vacía, **no deben dejarla vacía en el primer inicio**, porque la cuenta no se creará.
 
-Abrir **otra terminal** en la raíz del proyecto (donde está `package.json`):
+Cuando aparezca `Tomcat started on port 8080` y `Started PerfumesApplication`, el backend está iniciado. **Dejar abierta esta terminal**.
+
+Pueden comprobarlo entrando a http://localhost:8080/api/v1/productos: debería aparecer una lista JSON con los productos.
+
+### ¿Qué se crea automáticamente?
+
+Al iniciar sobre una base nueva, Spring Boot:
+
+1. Crea las tablas de MySQL mediante Hibernate.
+2. Carga **27 perfumes y 3 categorías** desde el catálogo inicial, cuando `productos` está vacío.
+3. Crea el administrador inicial cuando se le proporciona la contraseña y todavía no existe la cuenta.
+
+Si ya hay productos, **no los vuelve a importar ni duplica el catálogo**. Cada integrante trabaja con su propia base de datos local; las compras realizadas en otro PC no se transfieren por GitHub.
+
+> Para más detalles sobre MySQL, Swagger, permisos y los comandos de Spring Boot, consultar el [README del repositorio backend](https://github.com/Emilio-Parra/App-Perfume-Backend#readme).
+
+## 6. Iniciar el frontend React
+
+Con el backend ya iniciado, abrir **una segunda ventana de VS Code** y entrar a:
+
+```text
+App-Perfume-eva2/app-perfumes
+```
+
+Comprobar que en esa carpeta estén `package.json`, `src`, `public` y `vite.config.js`.
+
+Abrir **Terminal → New Terminal** y ejecutar, uno por uno:
 
 ```powershell
-npm ci
+npm install
 npm run dev
 ```
 
-Abrir en el navegador la dirección que indica Vite; normalmente:
+- `npm install` instala las dependencias del frontend. Normalmente basta con hacerlo la primera vez o cuando cambien las dependencias.
+- `npm run dev` levanta Vite, que mostrará una dirección como **http://localhost:5173/**.
 
-**http://localhost:5173**
+Abrir esa dirección en Chrome. Si Vite usa otro puerto, usar la URL que muestre la terminal.
 
-El archivo `vite.config.js` redirige las peticiones `/api` a **http://localhost:8080**. Por lo tanto, para utilizar login, productos, pedidos y panel administrativo, **MySQL y el backend deben estar funcionando**.
+**No cierren ninguna de las dos terminales** mientras utilicen la tienda: una mantiene el backend en el puerto 8080 y la otra el frontend en el 5173.
 
-### Resumen rápido de comandos
+**Documentación de la API:** con Spring Boot iniciado, abrir [Swagger UI](http://localhost:8080/swagger-ui.html). También existe la especificación [OpenAPI JSON](http://localhost:8080/v3/api-docs). Swagger documenta las rutas `/api/v1/...`; no sustituye al frontend y no es necesario abrirlo para comprar.
 
-| Servicio | Carpeta | Comando |
+### Comandos rápidos
+
+| Tarea | Carpeta donde ejecutar | Comando |
 | --- | --- | --- |
-| Backend | `backend/` | `.\mvnw.cmd spring-boot:run` |
-| Frontend | Raíz del proyecto | `npm run dev` |
-| Instalar dependencias de frontend | Raíz del proyecto | `npm ci` |
-| Compilar frontend | Raíz del proyecto | `npm run build` |
-| Ejecutar pruebas del backend | `backend/` | `.\mvnw.cmd test` |
+| Instalar dependencias de React | `app-perfumes` | `npm install` |
+| Iniciar frontend | `app-perfumes` | `npm run dev` |
+| Compilar frontend | `app-perfumes` | `npm run build` |
+| Vista previa de la compilación | `app-perfumes` | `npm run preview` |
+| Revisar código con el linter | `app-perfumes` | `npm run lint` |
+| Iniciar backend en Windows | `App-Perfume-Backend` | `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\iniciar-backend.ps1` |
+| Iniciar backend con Maven Wrapper (avanzado) | `App-Perfume-Backend` | `.\mvnw.cmd spring-boot:run` (requiere tener configuradas las variables de entorno) |
 
-## 7. Funcionalidades principales
+## 7. ¿Cómo se conecta el frontend con el backend?
 
-**Cliente**
-- Consultar el catálogo y filtrar perfumes por categoría o género.
-- Registrarse e iniciar sesión.
-- Agregar productos al carrito y realizar pedidos.
-- Simular el pago y consultar el comprobante de compra.
+El frontend todavía realiza solicitudes a rutas como `/api/productos`, mientras que el backend nuevo publica sus endpoints en **`/api/v1/productos`**. Para mantener la compatibilidad sin editar todos los servicios React, **Vite debe tener una regla `rewrite`** que agregue el prefijo `/v1` durante el desarrollo.
 
-**Administrador**
-- Crear, editar y eliminar productos y categorías.
-- Subir fotografías JPG, PNG o WebP al crear o editar un producto.
-- Consultar clientes y pedidos.
-- Consultar reportes comerciales, ventas por mes y productos más vendidos.
-- Imprimir reportes y comprobantes.
-- Modificar su perfil de administrador.
+En `app-perfumes/vite.config.js`, la parte del proxy debe contener esta configuración:
 
-## 8. ¿Dónde se guardan los datos?
+```js
+server: {
+  proxy: {
+    '/api': {
+      target: 'http://localhost:8080',
+      changeOrigin: true,
+      rewrite: (path) => path.replace(/^\/api(?!\/v1)/, '/api/v1'),
+    },
+  },
+},
+```
 
-- **MySQL:** productos, categorías, cuentas, pedidos, detalles y datos relacionados con las ventas.
-- **Imágenes nuevas:** archivos en `backend/uploads/productos/` cuando el backend se inicia desde `backend/`; MySQL conserva su ruta.
-- **Navegador:** algunos datos temporales del carrito y de la interfaz pueden utilizar `localStorage`.
+**Cómo funciona:**
 
-**Atención al trabajar en equipo:** las imágenes subidas localmente y las bases de datos de cada integrante **no se sincronizan por Git**. Si se importa una base de datos que contiene rutas de imágenes subidas, también deben existir los archivos correspondientes en el servidor local.
+| Petición del frontend | Ruta que recibe Spring Boot |
+| --- | --- |
+| `/api/productos` | `/api/v1/productos` |
+| `/api/categorias` | `/api/v1/categorias` |
+| `/api/admin/login` | `/api/v1/admin/login` |
+| `/api/productos/imagen/foto.jpg` | `/api/v1/productos/imagen/foto.jpg` |
+| `/api/v1/productos` | `/api/v1/productos` (no agrega `v1` dos veces) |
 
-## 9. Estructura del proyecto
+Este cambio también ayuda a mantener las fotos subidas anteriormente si sus rutas quedaron guardadas en MySQL como `/api/productos/imagen/...`.
+
+> **Importante:** el proxy de `vite.config.js` funciona con el servidor de desarrollo (`npm run dev`), no configura automáticamente un despliegue en producción. Para publicar la aplicación necesitarán configurar el proxy del servidor real o actualizar las URLs de los servicios para apuntar a la API v1.
+
+**Antes de probar en otro computador:** verifica que el `vite.config.js` descargado desde GitHub incluya realmente `rewrite`. Si falta, las peticiones antiguas pueden recibir un error **404**. Reinicia Vite tras cambiar ese archivo.
 
 ```text
-app-perfumes/
-├── src/                       # Frontend React
-│   ├── components/            # Páginas y componentes
-│   │   └── admin/             # Panel de administración
-│   └── service/               # Comunicación y servicios de datos
-├── public/                    # Recursos estáticos
-├── backend/
-│   ├── src/main/java/         # Controladores, servicios y modelos Java
-│   ├── src/main/resources/    # application.properties
-│   ├── uploads/productos/     # Imágenes cargadas localmente
-│   └── mvnw.cmd               # Maven Wrapper para Windows
-├── package.json
-├── vite.config.js
-└── README.md
+Navegador (http://localhost:5173)
+              |
+              v
+React + Vite (frontend)
+              |  /api/...  ->  /api/v1/... (proxy)
+              v
+Spring Boot (http://localhost:8080)
+              |
+              v
+MySQL (tienda_perfumes)
 ```
 
-## 10. Antes de subir cambios a GitHub
+Por eso no basta con abrir solo React: si Spring Boot está detenido, pueden verse las pantallas, pero el login, los pedidos y los datos de productos dejarán de funcionar correctamente.
 
-No incluir archivos generados ni secretos. Revisar que `.gitignore` contemple, al menos:
+## 8. Funcionalidades principales
 
-```gitignore
-node_modules/
-dist/
-backend/target/
-backend/uploads/
-backend/src/main/resources/application.properties
-.env
-.env.*
+### Vista cliente
+
+- Consultar perfumes y sus imágenes, precios, descuentos, descripciones y stock.
+- Filtrar productos por categoría (árabe, nicho y diseñador) y otras opciones disponibles en la interfaz.
+- Registrar una cuenta e iniciar sesión.
+- Agregar productos al carrito, revisar cantidades y completar datos de envío.
+- Realizar un **pedido simulado** y consultar el comprobante correspondiente.
+
+### Vista administrador
+
+- Iniciar sesión con la cuenta de administrador configurada en MySQL.
+- Consultar y administrar productos: crear, editar y eliminar.
+- Gestionar categorías y subir imágenes para los productos.
+- Revisar clientes y pedidos.
+- Consultar reportes de ventas y productos más vendidos.
+- Modificar los datos del perfil administrativo.
+
+**Los pedidos y el stock se guardan en MySQL a través del backend**, no se comparten automáticamente entre computadores del instituto.
+
+## 9. Estructura del frontend y dónde están los datos
+
+Estructura general del proyecto (puede haber más archivos y carpetas dentro de `src`):
+
+```text
+App-Perfume-eva2/
+└── app-perfumes/
+    ├── public/
+    │   └── img/                 # Imágenes originales del catálogo
+    ├── src/
+    │   ├── components/          # Páginas y componentes de la interfaz
+    │   │   └── admin/           # Vistas de administración
+    │   └── service/             # Servicios que llaman a la API
+    ├── package.json            # Dependencias y comandos de npm
+    ├── vite.config.js          # Proxy que adapta /api a /api/v1 en desarrollo
+    └── README.md               # Esta guía
 ```
 
-**Importante:** si `application.properties` **ya fue subido o agregado a Git**, ponerlo en `.gitignore` no lo retira automáticamente del control de versiones. Hay que dejar de rastrearlo y revisar el historial si contenía contraseñas reales. Mantener documentadas las propiedades necesarias en este README.
+- **Productos, categorías, usuarios, pedidos y compras:** se almacenan en MySQL del PC, a través del backend.
+- **Imágenes originales:** están en `app-perfumes/public/img/` y se incluyen con el frontend.
+- **Imágenes nuevas subidas desde administración:** normalmente se guardan en `App-Perfume-Backend/uploads/productos/`; son archivos locales excluidos de Git y deben respaldarse por separado si se necesitan en otro computador.
+- **Carrito y otros estados de interfaz:** pueden conservar datos temporales en el navegador mediante `localStorage`.
 
-Antes de subir, comprobar `git status` para revisar qué archivos se van a publicar. No subir respaldos reales de clientes ni contraseñas.
+**No es necesario copiar el backend dentro de la carpeta del frontend.** Son dos proyectos independientes conectados mediante la API.
 
-Para colaborar sin pisarse los cambios, cada integrante debe traer las actualizaciones del repositorio antes de empezar y realizar commits claros de sus modificaciones.
+### Rutas de la API v1
+
+La versión nueva agrupa sus endpoints en `/api/v1`, por ejemplo:
+
+- `/api/v1/productos` — catálogo y CRUD de productos.
+- `/api/v1/categorias` — categorías.
+- `/api/v1/usuarios` — registro y acceso de clientes.
+- `/api/v1/admin` — acceso y perfil del administrador.
+- `/api/v1/admin/usuarios` — gestión de clientes desde administración.
+- `/api/v1/pedidos` — pedidos y proceso de pago simulado.
+- `/api/v1/productos/imagen` — imágenes de productos.
+
+Estos endpoints están descritos en Swagger. Para las solicitudes con escritura o datos privados se aplican reglas de seguridad en el backend (se deben verificar en la versión del repositorio que se esté ejecutando). El sistema usa **sesiones**; la implementación de **JWT** se considera un trabajo posterior y no se debe anunciar como terminada.
+
+## 10. Cómo comprobar que todo está funcionando
+
+Después de iniciar ambos proyectos:
+
+1. Entrar a **http://localhost:8080/api/v1/productos** y comprobar que devuelve JSON. Abrir también **http://localhost:8080/swagger-ui.html** para comprobar Swagger.
+2. Abrir **http://localhost:5173/** y revisar que aparezcan **27 perfumes**, con sus imágenes.
+3. Probar los filtros de categorías.
+4. Iniciar sesión como administrador con `admin@duoc.cl` y la contraseña configurada durante el primer inicio.
+5. Probar el registro de un cliente y un pedido de ejemplo si es necesario.
+6. Comprobar en Workbench, usando la conexión **Tienda Perfumes**, que los datos se guardan en la base local.
+
+En Workbench, algunas consultas útiles son:
+
+```sql
+USE tienda_perfumes;
+
+SELECT COUNT(*) AS total_productos FROM productos;
+SELECT tipo, COUNT(*) AS cantidad FROM productos GROUP BY tipo;
+SELECT id, codigo, fecha, estado, total FROM pedidos ORDER BY fecha DESC;
+```
 
 ## 11. Problemas frecuentes
 
-| Problema | Qué revisar |
+| Problema | Qué hacer |
 | --- | --- |
-| El frontend abre, pero no carga datos | Que Spring Boot esté encendido en el puerto 8080. |
-| Error de conexión MySQL | Que MySQL esté iniciado, exista `tienda_perfumes` y las credenciales sean correctas. |
-| Error 401 o 403 | Revisar que la sesión esté iniciada y tenga el rol requerido. |
-| No aparecen los 28 productos de la demostración | Un repositorio Git no incluye automáticamente la base de datos local; hay que importar datos de prueba. |
-| Una fotografía subida no aparece en otro computador | Comprobar que también exista el archivo en `backend/uploads/productos/`. |
-| Puerto 5173 u 8080 ocupado | Cerrar la otra aplicación que utiliza ese puerto o revisar la configuración. |
+| `npm` no se reconoce | Revisar que Node.js y npm estén instalados (`node -v` y `npm -v`). |
+| `npm` no encuentra `package.json` | Están en la carpeta equivocada; ingresar a **`App-Perfume-eva2/app-perfumes`**. |
+| Vite abre, pero no aparecen los productos | Comprobar que Spring Boot siga funcionando y abrir `http://localhost:8080/api/v1/productos`. |
+| Error 404 en `/api/productos` | Comprobar el `rewrite` del proxy en `vite.config.js`, porque el backend responde en `/api/v1/productos`. Reiniciar Vite. |
+| Swagger no abre | Verificar que el backend esté iniciado y que la dependencia springdoc esté instalada; comprobar `/swagger-ui.html` y `/v3/api-docs`. |
+| Error de conexión con MySQL | Revisar que exista `tienda_perfumes` y que la conexión `Tienda Perfumes` funcione con `tienda_app` y `Root1234`. |
+| El administrador no puede iniciar sesión | Comprobar en Workbench `SELECT correo FROM administradores;`. Si no existe `admin@duoc.cl`, volver a iniciar el backend y **escribir la segunda contraseña** al solicitarla. |
+| Contraseña del administrador incorrecta | No confundir la contraseña MySQL con la del admin; solo coinciden si se configuraron iguales. La contraseña inicial no reemplaza una cuenta ya existente, incluso si un compañero utiliza otra clave como `admin123`. En una base nueva de práctica, usen la que indiquen al iniciar por primera vez. |
+| Vite usa otro puerto | Abrir la URL que indique la terminal; `5173` puede estar ocupado. |
+| Puerto 8080 ocupado | Detener el backend que ya se esté ejecutando antes de iniciar otra instancia. |
+| No se ven fotografías nuevas en otro PC | La carpeta `uploads/productos` del backend no se sincroniza por Git. |
+| Los pedidos no aparecen en el PC de otro compañero | Cada PC tiene su propia base MySQL; GitHub comparte el código, no los datos de cada integrante. |
+
+## 12. Trabajar en equipo y subir cambios
+
+Antes de editar, desde la carpeta del repositorio correspondiente (`App-Perfume-eva2`, raíz donde está `.git`):
+
+```powershell
+git pull origin main
+```
+
+Después de terminar y revisar los archivos modificados:
+
+```powershell
+git status
+git add app-perfumes/README.md
+git commit -m "docs: documentar frontend y API v1"
+git push origin main
+```
+
+**Revisen `git status` antes de hacer `git add .`** para no subir archivos innecesarios, dependencias (`node_modules`), compilaciones (`dist`) ni información privada.
+
+Los cambios en React se suben al repositorio **`App-Perfume-eva2`**, mientras que los cambios en Java y la carga automática de datos se suben a **`App-Perfume-Backend`**.
+
+**Coordinación importante:** el backend nuevo y el proxy actualizado del frontend deben estar en los repositorios **antes** de que un compañero haga `git pull` y los ejecute. No basta con que los cambios funcionen en el PC de quien los hizo.
 
 ---
 
-**Proyecto académico Fullstack 2 — Perfumes Store.**
+**Proyecto académico — Fullstack 2 — Perfumes Store.**
+
+> **Seguridad:** `Root1234` es una contraseña compartida solo para facilitar esta práctica local del instituto. No la utilicen en servidores públicos ni con datos personales reales. En un entorno real, cada instalación debe usar contraseñas distintas y seguras.
