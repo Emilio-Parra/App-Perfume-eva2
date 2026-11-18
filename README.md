@@ -64,12 +64,11 @@ Las carpetas quedan separadas, por ejemplo:
 
 ```text
 Downloads/
-├── App-Perfume-eva2/
-│   └── app-perfumes/          # Aquí está package.json: FRONTEND
+├── App-Perfume-eva2/         # Aquí está package.json: FRONTEND
 └── App-Perfume-Backend/      # Aquí están pom.xml y mvnw.cmd: BACKEND
 ```
 
-**Ojo:** para ejecutar `npm`, se debe abrir **`App-Perfume-eva2/app-perfumes`**, no la carpeta exterior `App-Perfume-eva2`.
+**Ojo:** ahora el frontend está organizado directamente en la **raíz de `App-Perfume-eva2`**. No hay que entrar a una carpeta adicional `app-perfumes` para ejecutar `npm`.
 
 ## 4. Primera vez: preparar MySQL Workbench
 
@@ -167,7 +166,7 @@ Si ya hay productos, **no los vuelve a importar ni duplica el catálogo**. Cada 
 Con el backend ya iniciado, abrir **una segunda ventana de VS Code** y entrar a:
 
 ```text
-App-Perfume-eva2/app-perfumes
+App-Perfume-eva2
 ```
 
 Comprobar que en esa carpeta estén `package.json`, `src`, `public` y `vite.config.js`.
@@ -192,11 +191,11 @@ Abrir esa dirección en Chrome. Si Vite usa otro puerto, usar la URL que muestre
 
 | Tarea | Carpeta donde ejecutar | Comando |
 | --- | --- | --- |
-| Instalar dependencias de React | `app-perfumes` | `npm install` |
-| Iniciar frontend | `app-perfumes` | `npm run dev` |
-| Compilar frontend | `app-perfumes` | `npm run build` |
-| Vista previa de la compilación | `app-perfumes` | `npm run preview` |
-| Revisar código con el linter | `app-perfumes` | `npm run lint` |
+| Instalar dependencias de React | `App-Perfume-eva2` | `npm install` |
+| Iniciar frontend | `App-Perfume-eva2` | `npm run dev` |
+| Compilar frontend | `App-Perfume-eva2` | `npm run build` |
+| Vista previa de la compilación | `App-Perfume-eva2` | `npm run preview` |
+| Revisar código con el linter | `App-Perfume-eva2` | `npm run lint` |
 | Iniciar backend en Windows | `App-Perfume-Backend` | `powershell.exe -NoProfile -ExecutionPolicy Bypass -File .\iniciar-backend.ps1` |
 | Iniciar backend con Maven Wrapper (avanzado) | `App-Perfume-Backend` | `.\mvnw.cmd spring-boot:run` (requiere tener configuradas las variables de entorno) |
 
@@ -204,7 +203,7 @@ Abrir esa dirección en Chrome. Si Vite usa otro puerto, usar la URL que muestre
 
 El frontend todavía realiza solicitudes a rutas como `/api/productos`, mientras que el backend nuevo publica sus endpoints en **`/api/v1/productos`**. Para mantener la compatibilidad sin editar todos los servicios React, **Vite debe tener una regla `rewrite`** que agregue el prefijo `/v1` durante el desarrollo.
 
-En `app-perfumes/vite.config.js`, la parte del proxy debe contener esta configuración:
+En `vite.config.js`, la parte del proxy debe contener esta configuración:
 
 ```js
 server: {
@@ -276,20 +275,21 @@ Estructura general del proyecto (puede haber más archivos y carpetas dentro de 
 
 ```text
 App-Perfume-eva2/
-└── app-perfumes/
-    ├── public/
-    │   └── img/                 # Imágenes originales del catálogo
-    ├── src/
-    │   ├── components/          # Páginas y componentes de la interfaz
-    │   │   └── admin/           # Vistas de administración
-    │   └── service/             # Servicios que llaman a la API
-    ├── package.json            # Dependencias y comandos de npm
-    ├── vite.config.js          # Proxy que adapta /api a /api/v1 en desarrollo
-    └── README.md               # Esta guía
+├── public/
+│   └── img/                 # Imágenes originales del catálogo
+├── src/
+│   ├── components/          # Páginas y componentes de la interfaz
+│   │   └── admin/           # Vistas de administración
+│   └── service/             # Servicios que llaman a la API
+├── index.html
+├── package.json             # Dependencias y comandos de npm
+├── package-lock.json        # Versiones de dependencias instalables
+├── vite.config.js           # Proxy que adapta /api a /api/v1 en desarrollo
+└── README.md                # Esta guía
 ```
 
 - **Productos, categorías, usuarios, pedidos y compras:** se almacenan en MySQL del PC, a través del backend.
-- **Imágenes originales:** están en `app-perfumes/public/img/` y se incluyen con el frontend.
+- **Imágenes originales:** están en `public/img/` y se incluyen con el frontend.
 - **Imágenes nuevas subidas desde administración:** normalmente se guardan en `App-Perfume-Backend/uploads/productos/`; son archivos locales excluidos de Git y deben respaldarse por separado si se necesitan en otro computador.
 - **Carrito y otros estados de interfaz:** pueden conservar datos temporales en el navegador mediante `localStorage`.
 
@@ -335,7 +335,7 @@ SELECT id, codigo, fecha, estado, total FROM pedidos ORDER BY fecha DESC;
 | Problema | Qué hacer |
 | --- | --- |
 | `npm` no se reconoce | Revisar que Node.js y npm estén instalados (`node -v` y `npm -v`). |
-| `npm` no encuentra `package.json` | Están en la carpeta equivocada; ingresar a **`App-Perfume-eva2/app-perfumes`**. |
+| `npm` no encuentra `package.json` | Están en la carpeta equivocada; ingresar a **`App-Perfume-eva2`**. |
 | Vite abre, pero no aparecen los productos | Comprobar que Spring Boot siga funcionando y abrir `http://localhost:8080/api/v1/productos`. |
 | Error 404 en `/api/productos` | Comprobar el `rewrite` del proxy en `vite.config.js`, porque el backend responde en `/api/v1/productos`. Reiniciar Vite. |
 | Swagger no abre | Verificar que el backend esté iniciado y que la dependencia springdoc esté instalada; comprobar `/swagger-ui.html` y `/v3/api-docs`. |
@@ -349,7 +349,7 @@ SELECT id, codigo, fecha, estado, total FROM pedidos ORDER BY fecha DESC;
 
 ## 12. Trabajar en equipo y subir cambios
 
-Antes de editar, desde la carpeta del repositorio correspondiente (`App-Perfume-eva2`, raíz donde está `.git`):
+Antes de editar, desde la carpeta del repositorio correspondiente (`App-Perfume-eva2`, la misma raíz que contiene `.git` y `package.json`):
 
 ```powershell
 git pull origin main
@@ -359,7 +359,7 @@ Después de terminar y revisar los archivos modificados:
 
 ```powershell
 git status
-git add app-perfumes/README.md
+git add README.md
 git commit -m "docs: documentar frontend y API v1"
 git push origin main
 ```
