@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { BuscadorNavbar } from './BuscadorNavbar';
+import { usaPanel, nombrePanel } from '../utils/roles';
 
 // Un solo enlace "Catálogo": las categorías se filtran dentro de esa página
 const ENLACES = [
@@ -87,12 +88,12 @@ export function Navbar({
                 <span className="text-light small">
                   👤 Hola, <strong>{usuarioActual.nombre || usuarioActual.correo}</strong>
                 </span>
-                {usuarioActual.rol === 'admin' && (
+                {usaPanel(usuarioActual) && (
                   <button
                     className="btn btn-warning btn-sm fw-bold"
                     onClick={() => handleNavClick('admin')}
                   >
-                    Panel admin
+                    Panel {nombrePanel(usuarioActual).toLowerCase()}
                   </button>
                 )}
                 <button 

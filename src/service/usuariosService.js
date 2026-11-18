@@ -1,4 +1,5 @@
-// Usuarios del administrador: datos en MySQL por Spring Boot, no localStorage.
+// Usuarios del administrador (clientes y vendedores): datos en MySQL por Spring Boot.
+// El backend solo acepta los roles 'cliente' o 'vendedor' desde el panel.
 const API = '/api/admin/usuarios';
 let usuariosCache = [];
 
@@ -28,7 +29,7 @@ export const crearUsuario = async (datos) => {
   const respuesta = await fetch(API, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ ...datos, rol: 'cliente' }),
+    body: JSON.stringify({ ...datos, rol: datos.rol || 'cliente' }),
   });
   await validar(respuesta);
   const creado = await respuesta.json();
@@ -40,7 +41,7 @@ export const actualizarUsuario = async (correoOriginal, cambios) => {
   const respuesta = await fetch(`${API}/${encodeURIComponent(correoOriginal)}`, {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ ...obtenerUsuario(correoOriginal), ...cambios, rol: 'cliente' }),
+    body: JSON.stringify({ ...obtenerUsuario(correoOriginal), ...cambios, rol: cambios.rol || obtenerUsuario(correoOriginal)?.rol || 'cliente' }),
   });
   await validar(respuesta);
   const actualizado = await respuesta.json();

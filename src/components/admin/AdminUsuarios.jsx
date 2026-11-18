@@ -27,7 +27,7 @@ export function AdminUsuarios({ usuarios, usuarioActual, onNuevo, onEditar, onHi
                 <td>{u.rut}</td>
                 <td>{u.nombre} {u.apellido}</td>
                 <td>{u.correo}</td>
-                <td><span className={`badge text-bg-${u.rol === 'admin' ? 'warning' : 'secondary'}`}>{u.rol || 'cliente'}</span></td>
+                <td><span className={`badge text-bg-${u.rol === 'admin' ? 'warning' : u.rol === 'vendedor' ? 'info' : 'secondary'}`}>{u.rol || 'cliente'}</span></td>
                 <td className="text-end text-nowrap">
                   <button className="btn btn-sm btn-outline-secondary me-1" onClick={() => onHistorial(u.correo)}>Historial</button>
                   <button className="btn btn-sm btn-outline-primary me-1" onClick={() => onEditar(u.correo)}>Editar</button>

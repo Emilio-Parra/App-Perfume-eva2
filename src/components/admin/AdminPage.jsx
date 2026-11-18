@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { AdminLayout } from './AdminLayout';
 import { AdminDashboard } from './AdminDashboard';
 import { AdminOrdenes, AdminBoleta } from './AdminOrdenes';
-import { AdminProductos, AdminProductosCriticos, AdminProductoFormulario } from './AdminProductos';
+import { AdminProductos, AdminProductosCriticos, AdminProductoFormulario, AdminProductoDetalle } from './AdminProductos';
 import { AdminCategorias } from './AdminCategorias';
 import { AdminUsuarios, AdminUsuarioFormulario, AdminHistorial } from './AdminUsuarios';
 import { AdminReportes } from './AdminReportes';
@@ -11,11 +11,14 @@ import { obtenerPedidos, obtenerPedido } from '../../service/pedidosService';
 import { obtenerProductos, obtenerProducto, crearProducto, actualizarProducto, eliminarProducto } from '../../service/productosService';
 import { obtenerCategorias, cargarCategorias, crearCategoria, actualizarCategoria, eliminarCategoria } from '../../service/categoriasService';
 import { obtenerUsuarios, obtenerUsuario, cargarUsuarios, crearUsuario, actualizarUsuario, eliminarUsuario } from '../../service/usuariosService';
+import { esAdmin, esVendedor, puedeVerVista, vistaInicial } from '../../utils/roles';
 
 // Contenedor del panel de administración. Las categorías y pedidos se consultan
 // desde Spring Boot; los demás servicios conservan sus funciones actuales.
 export function AdminPage({ usuarioActual, onUsuarioActualizado, onProductosCambiados, onIrATienda, onCerrarSesion }) {
-  const [ruta, setRuta] = useState({ vista: 'dashboard', param: null, volver: null });
+  // El vendedor parte en Órdenes; el administrador en el Dashboard
+  const [ruta, setRuta] = useState(() => ({ vista: vistaInicial(usuarioActual), param: null, volver: null }));
+  const soloLectura = esVendedor(usuarioActual);
   const [datos, setDatos] = useState(() => ({
     productos: obtenerProductos(),
     categorias: obtenerCategorias(),
@@ -40,9 +43,13 @@ export function AdminPage({ usuarioActual, onUsuarioActualizado, onProductosCamb
     return () => { activo = false; };
   }, []);
 
-  // Listado real de clientes desde MySQL.
+  // Listado real de clientes desde MySQL (solo el administrador tiene acceso).
   useEffect(() => {
     let activo = true;
+    if (!esAdmin(usuarioActual)) {
+      setCargandoUsuarios(false);
+      return () => { activo = false; };
+    }
     cargarUsuarios()
       .then((usuarios) => {
         if (activo) setDatos((anterior) => ({ ...anterior, usuarios }));
@@ -52,6 +59,8 @@ export function AdminPage({ usuarioActual, onUsuarioActualizado, onProductosCamb
       })
       .finally(() => { if (activo) setCargandoUsuarios(false); });
     return () => { activo = false; };
+    // Se carga una sola vez al abrir el panel
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Órdenes reales de MySQL. El resto del panel sigue como estaba.
@@ -119,6 +128,8 @@ export function AdminPage({ usuarioActual, onUsuarioActualizado, onProductosCamb
   };
 
   const ir = (vista, param = null, volver = null) => {
+    // Evita que un rol abra secciones que no le corresponden
+    if (!puedeVerVista(usuarioActual, vista)) return;
     setErrorUsuario('');
     setRuta({ vista, param, volver });
   };
@@ -271,7 +282,9 @@ export function AdminPage({ usuarioActual, onUsuarioActualizado, onProductosCamb
     return confirmado;
   };
 
-  const { vista, param, volver } = ruta;
+  const { param, volver } = ruta;
+  // Si la vista guardada no está permitida para el rol, se muestra la inicial
+  const vista = puedeVerVista(usuarioActual, ruta.vista) ? ruta.vista : vistaInicial(usuarioActual);
 
   // Evita mostrar cifras incorrectas mientras se consulta MySQL.
   const mostrarConPedidos = (vistaConDatos) => {
@@ -305,13 +318,25 @@ export function AdminPage({ usuarioActual, onUsuarioActualizado, onProductosCamb
     case 'productos':
       contenido = (
         <AdminProductos productos={datos.productos} categorias={datos.categorias} vista={vista} onIr={ir}
+          onVer={(id) => ir('producto-detalle', id)} soloLectura={soloLectura}
           onEditar={(id) => ir('producto-editar', id)} onEliminar={borrarProducto} />
       );
       break;
     case 'producto-criticos':
       contenido = (
         <AdminProductosCriticos productos={datos.productos} vista={vista} onIr={ir}
+          onVer={(id) => ir('producto-detalle', id)} soloLectura={soloLectura}
           onEditar={(id) => ir('producto-editar', id)} onEliminar={borrarProducto} />
+      );
+      break;
+    case 'producto-detalle':
+      contenido = (
+        <AdminProductoDetalle
+          producto={obtenerProducto(param)}
+          soloLectura={soloLectura}
+          onEditar={(id) => ir('producto-editar', id)}
+          onVolver={() => ir('productos')}
+        />
       );
       break;
     case 'producto-reportes':

@@ -71,6 +71,7 @@ export function UsuarioForm({ inicial, errorExterno, onGuardar, onCancelar }) {
           <label htmlFor="u-rol" className="form-label">Rol</label>
           <select id="u-rol" name="rol" className="form-select" value={datos.rol} onChange={cambiar}>
             <option value="cliente">Cliente</option>
+            <option value="vendedor">Vendedor</option>
 
           </select>
         </div>

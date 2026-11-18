@@ -3,14 +3,19 @@ import { ProductoForm } from './ProductoForm';
 import { esCritico, STOCK_CRITICO } from '../../service/productosService';
 import { clp } from '../../utils/formato';
 
-const Encabezado = ({ titulo, vista, onIr }) => (
+// soloLectura = true para el vendedor: no ve "Reportes" ni "+ Nuevo producto"
+const Encabezado = ({ titulo, vista, onIr, soloLectura }) => (
   <div className="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
     <h1 className="h3 mb-0">{titulo}</h1>
     <div className="btn-group">
       <button className={`btn btn-sm ${vista === 'productos' ? 'btn-dark' : 'btn-outline-dark'}`} onClick={() => onIr('productos')}>Listado</button>
       <button className={`btn btn-sm ${vista === 'producto-criticos' ? 'btn-dark' : 'btn-outline-dark'}`} onClick={() => onIr('producto-criticos')}>Críticos</button>
-      <button className={`btn btn-sm ${vista === 'producto-reportes' ? 'btn-dark' : 'btn-outline-dark'}`} onClick={() => onIr('producto-reportes')}>Reportes</button>
-      <button className="btn btn-sm btn-primary" onClick={() => onIr('producto-nuevo')}>+ Nuevo producto</button>
+      {!soloLectura && (
+        <>
+          <button className={`btn btn-sm ${vista === 'producto-reportes' ? 'btn-dark' : 'btn-outline-dark'}`} onClick={() => onIr('producto-reportes')}>Reportes</button>
+          <button className="btn btn-sm btn-primary" onClick={() => onIr('producto-nuevo')}>+ Nuevo producto</button>
+        </>
+      )}
     </div>
   </div>
 );
@@ -19,7 +24,7 @@ const StockBadge = ({ p }) => (
   <span className={`badge text-bg-${esCritico(p) ? 'danger' : 'success'}`}>{p.stock}</span>
 );
 
-function TablaProductos({ productos, onEditar, onEliminar }) {
+function TablaProductos({ productos, onVer, onEditar, onEliminar, soloLectura }) {
   return (
     <div className="table-responsive bg-white rounded shadow-sm">
       <table className="table table-hover align-middle mb-0">
@@ -39,8 +44,15 @@ function TablaProductos({ productos, onEditar, onEliminar }) {
               <td className="text-end">{clp(p.precio)}{Number(p.descuento) > 0 && <span className="badge bg-danger ms-1">-{p.descuento}%</span>}</td>
               <td className="text-center"><StockBadge p={p} /></td>
               <td className="text-end text-nowrap">
-                <button className="btn btn-sm btn-outline-primary me-1" onClick={() => onEditar(p.id)}>Editar</button>
-                <button className="btn btn-sm btn-outline-danger" onClick={() => onEliminar(p)}>Eliminar</button>
+                {onVer && (
+                  <button className="btn btn-sm btn-outline-secondary me-1" onClick={() => onVer(p.id)}>Ver</button>
+                )}
+                {!soloLectura && (
+                  <>
+                    <button className="btn btn-sm btn-outline-primary me-1" onClick={() => onEditar(p.id)}>Editar</button>
+                    <button className="btn btn-sm btn-outline-danger" onClick={() => onEliminar(p)}>Eliminar</button>
+                  </>
+                )}
               </td>
             </tr>
           ))}
@@ -51,7 +63,7 @@ function TablaProductos({ productos, onEditar, onEliminar }) {
 }
 
 // Listado + buscador + filtro de categoría
-export function AdminProductos({ productos, categorias, vista, onIr, onEditar, onEliminar }) {
+export function AdminProductos({ productos, categorias, vista, onIr, onVer, onEditar, onEliminar, soloLectura = false }) {
   const [texto, setTexto] = useState('');
   const [cat, setCat] = useState('todas');
   const q = texto.trim().toLowerCase();
@@ -62,7 +74,7 @@ export function AdminProductos({ productos, categorias, vista, onIr, onEditar, o
 
   return (
     <>
-      <Encabezado titulo="Productos" vista={vista} onIr={onIr} />
+      <Encabezado titulo="Productos" vista={vista} onIr={onIr} soloLectura={soloLectura} />
       <div className="row g-2 mb-3">
         <div className="col-md-6">
           <input className="form-control" placeholder="Buscar por marca o modelo" aria-label="Buscar productos" value={texto} onChange={(e) => setTexto(e.target.value)} />
@@ -74,18 +86,18 @@ export function AdminProductos({ productos, categorias, vista, onIr, onEditar, o
           </select>
         </div>
       </div>
-      <TablaProductos productos={filtrados} onEditar={onEditar} onEliminar={onEliminar} />
+      <TablaProductos productos={filtrados} onVer={onVer} onEditar={onEditar} onEliminar={onEliminar} soloLectura={soloLectura} />
     </>
   );
 }
 
-export function AdminProductosCriticos({ productos, vista, onIr, onEditar, onEliminar }) {
+export function AdminProductosCriticos({ productos, vista, onIr, onVer, onEditar, onEliminar, soloLectura = false }) {
   const criticos = [...productos].filter(esCritico).sort((a, b) => a.stock - b.stock);
   return (
     <>
-      <Encabezado titulo="Productos críticos" vista={vista} onIr={onIr} />
+      <Encabezado titulo="Productos críticos" vista={vista} onIr={onIr} soloLectura={soloLectura} />
       <p className="text-muted">Productos con stock de {STOCK_CRITICO} unidades o menos ({criticos.length}).</p>
-      <TablaProductos productos={criticos} onEditar={onEditar} onEliminar={onEliminar} />
+      <TablaProductos productos={criticos} onVer={onVer} onEditar={onEditar} onEliminar={onEliminar} soloLectura={soloLectura} />
     </>
   );
 }
@@ -95,6 +107,66 @@ export function AdminProductoFormulario({ producto, categorias, onGuardar, onCan
     <>
       <h1 className="h3 mb-3">{producto ? `Editar producto #${producto.id}` : 'Nuevo producto'}</h1>
       <ProductoForm inicial={producto} categorias={categorias} onGuardar={onGuardar} onCancelar={onCancelar} />
+    </>
+  );
+}
+
+// Detalle de un producto (solo lectura). Lo usan el vendedor y el administrador.
+export function AdminProductoDetalle({ producto, onVolver, onEditar, soloLectura = false }) {
+  if (!producto) {
+    return (
+      <>
+        <p className="text-muted">El producto no existe o fue eliminado.</p>
+        <button className="btn btn-dark" onClick={onVolver}>Volver</button>
+      </>
+    );
+  }
+
+  const descuento = Number(producto.descuento) || 0;
+  const precioFinal = Math.round(Number(producto.precio) * (100 - descuento) / 100);
+
+  return (
+    <>
+      <div className="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+        <h1 className="h3 mb-0">Producto #{producto.id}</h1>
+        <div className="d-flex gap-2">
+          {!soloLectura && (
+            <button className="btn btn-outline-primary btn-sm" onClick={() => onEditar(producto.id)}>Editar</button>
+          )}
+          <button className="btn btn-dark btn-sm" onClick={onVolver}>Volver a productos</button>
+        </div>
+      </div>
+
+      <div className="card shadow-sm">
+        <div className="row g-0">
+          <div className="col-md-4 d-flex align-items-center justify-content-center p-3 bg-light">
+            <img src={producto.imagenes} alt={`${producto.marca} ${producto.modelo}`}
+              className="img-fluid" style={{ maxHeight: 280, objectFit: 'contain' }} />
+          </div>
+          <div className="col-md-8">
+            <div className="card-body">
+              <h2 className="h4">{producto.marca} <span className="fw-normal">{producto.modelo}</span></h2>
+              <p className="text-muted mb-3">{producto.descripcion}</p>
+              <table className="table table-sm mb-0">
+                <tbody>
+                  <tr><th scope="row">Categoría</th><td className="text-capitalize">{producto.tipo}</td></tr>
+                  <tr><th scope="row">Género</th><td className="text-capitalize">{producto.genero}</td></tr>
+                  <tr><th scope="row">Volumen</th><td>{producto.volumen}</td></tr>
+                  <tr><th scope="row">Precio</th><td>{clp(producto.precio)}</td></tr>
+                  <tr><th scope="row">Descuento</th><td>{descuento > 0 ? `${descuento}% (precio final ${clp(precioFinal)})` : 'Sin descuento'}</td></tr>
+                  <tr>
+                    <th scope="row">Stock</th>
+                    <td>
+                      <StockBadge p={producto} />
+                      {esCritico(producto) && <span className="small text-danger ms-2">Stock crítico</span>}
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
     </>
   );
 }

@@ -24,6 +24,7 @@ import { BlogDetallePage } from './components/BlogDetallePage';
 import { obtenerBlogs, obtenerBlog } from './data/blogs';
 import { precioFinal, enOferta } from './utils/precios';
 import { EVENTO_SESION_EXPIRADA } from './service/authFetch';
+import { usaPanel } from './utils/roles';
 
 function App() {
   const [productos, setProductos] = useState([]);
@@ -73,7 +74,8 @@ function App() {
   // El panel admin modifica los productos: se vuelve a leer el catálogo para la tienda
   const recargarProductos = () => setProductos(obtenerProductos());
 
-  const esAdmin = usuarioActual?.rol === 'admin';
+  // El admin y el vendedor entran al panel interno; el cliente solo a la tienda
+  const accesoPanel = usaPanel(usuarioActual);
 
   useEffect(() => {
     localStorage.setItem('carrito_perfumes', JSON.stringify(carrito));
@@ -102,7 +104,7 @@ function App() {
 
   const handleLoginSuccess = (usuario) => {
     setUsuarioActual(usuario);
-    setPaginaActual(usuario.rol === 'admin' ? 'admin' : 'inicio');
+    setPaginaActual(usaPanel(usuario) ? 'admin' : 'inicio');
   };
 
   // El admin edita su perfil o sus datos: se actualiza también la sesión guardada
@@ -240,8 +242,8 @@ function App() {
   const totalItems = carrito.reduce((acc, item) => acc + item.cantidad, 0);
   const totalMonto = carrito.reduce((acc, item) => acc + item.precio * item.cantidad, 0);
 
-  // Panel de administración: layout propio, solo para usuarios con rol admin
-  if (paginaActual === 'admin' && esAdmin) {
+  // Panel interno: layout propio, solo para los roles admin y vendedor
+  if (paginaActual === 'admin' && accesoPanel) {
     return (
       <AdminPage
         usuarioActual={usuarioActual}

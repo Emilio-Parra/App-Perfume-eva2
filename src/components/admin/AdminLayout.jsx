@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { puedeVerVista, esAdmin, nombrePanel } from '../../utils/roles';
 
 // Menú lateral del panel. "grupo" resalta el ítem aunque se esté en una sub-vista.
 const MENU = [
@@ -18,13 +19,16 @@ export function AdminLayout({ vista, onIr, onIrATienda, onCerrarSesion, usuario,
     setMenuAbierto(false);
   };
 
+  // Cada rol ve solo las secciones que tiene permitidas (el vendedor: Órdenes y Productos)
+  const menuVisible = MENU.filter((m) => puedeVerVista(usuario, m.vista));
+
   const itemClase = (activo) =>
     `btn text-start w-100 mb-1 ${activo ? 'btn-primary' : 'btn-light text-dark border-0'}`;
 
   return (
     <div className="d-flex flex-column min-vh-100 bg-light">
       <header className="navbar navbar-dark bg-dark px-3 no-print">
-        <span className="navbar-brand fw-bold text-warning mb-0">✨ Perfumes Store · Admin</span>
+        <span className="navbar-brand fw-bold text-warning mb-0">✨ Perfumes Store · {nombrePanel(usuario)}</span>
         <div className="d-flex align-items-center gap-2">
           <span className="text-light small d-none d-sm-inline">{usuario?.nombre}</span>
           <button
@@ -43,7 +47,7 @@ export function AdminLayout({ vista, onIr, onIrATienda, onCerrarSesion, usuario,
         <div className="row h-100">
           <aside className={`col-lg-2 col-md-12 bg-white border-end py-3 no-print ${menuAbierto ? '' : 'd-none d-lg-block'}`}>
             <nav aria-label="Menú de administración">
-              {MENU.map((m) => (
+              {menuVisible.map((m) => (
                 <button
                   key={m.vista}
                   className={itemClase(m.grupo.includes(vista))}
@@ -53,9 +57,11 @@ export function AdminLayout({ vista, onIr, onIrATienda, onCerrarSesion, usuario,
                 </button>
               ))}
               <hr />
-              <button className={itemClase(vista === 'perfil')} onClick={() => ir('perfil')}>
-                <span className="me-2" aria-hidden="true">👤</span>Perfil
-              </button>
+              {esAdmin(usuario) && (
+                <button className={itemClase(vista === 'perfil')} onClick={() => ir('perfil')}>
+                  <span className="me-2" aria-hidden="true">👤</span>Perfil
+                </button>
+              )}
               <button className="btn btn-dark w-100 mb-1 mt-3" onClick={onIrATienda}>🏬 Tienda</button>
               <button className="btn btn-danger w-100" onClick={onCerrarSesion}>⏻ Cerrar Sesión</button>
             </nav>
