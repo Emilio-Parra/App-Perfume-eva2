@@ -258,9 +258,17 @@ Por eso no basta con abrir solo React: si Spring Boot está detenido, pueden ver
 - Agregar productos al carrito, revisar cantidades y completar datos de envío.
 - Realizar un **pedido simulado** y consultar el comprobante correspondiente.
 
+### Vista vendedor
+
+- Iniciar sesión con la cuenta que le crea el administrador (**Usuarios → + Nuevo usuario → Rol: Vendedor**).
+- Ver la lista y el detalle de las **órdenes** (boletas).
+- Ver la lista y el detalle de los **productos**, en modo solo lectura: no aparecen los botones para crear, editar ni eliminar.
+- El menú del panel muestra solo **Órdenes** y **Productos**. Las demás secciones no aparecen, y si alguien intenta usarlas, el backend responde 403.
+
 ### Vista administrador
 
 - Iniciar sesión con la cuenta de administrador configurada en MySQL.
+- Crear, editar y eliminar clientes y **vendedores**.
 - Consultar y administrar productos: crear, editar y eliminar.
 - Gestionar categorías y subir imágenes para los productos.
 - Revisar clientes y pedidos.
@@ -268,6 +276,20 @@ Por eso no basta con abrir solo React: si Spring Boot está detenido, pueden ver
 - Modificar los datos del perfil administrativo.
 
 **Los pedidos y el stock se guardan en MySQL a través del backend**, no se comparten automáticamente entre computadores del instituto.
+
+### Autenticación con JWT
+
+Al iniciar sesión, el backend devuelve un **token JWT** (válido por 2 horas) que se guarda junto con el usuario en `localStorage` (`usuario_actual`).
+
+- `src/service/authFetch.js` agrega automáticamente el encabezado `Authorization: Bearer <token>` a **todas** las llamadas a `/api`. Se activa en `src/main.jsx`, así no hay que modificar cada `fetch`.
+- Si el backend responde **401** (el token venció o no es válido), `authFetch.js` borra la sesión y `App.jsx` muestra *"Tu sesión expiró. Inicia sesión nuevamente."* y lleva al login.
+- `src/utils/roles.js` define qué ve cada rol en el panel. Esto solo oculta opciones: **la seguridad real está en el backend**.
+
+| Rol | Al iniciar sesión | Puede ver |
+|---|---|---|
+| Cliente | Queda en la tienda | Tienda, carrito, compra y boleta |
+| Vendedor | Entra al panel en **Órdenes** | Órdenes y productos (solo lectura) |
+| Administrador | Entra al panel en el **Dashboard** | Todo el panel |
 
 ## 9. Estructura del frontend y dónde están los datos
 
@@ -279,8 +301,12 @@ App-Perfume-eva2/
 │   └── img/                 # Imágenes originales del catálogo
 ├── src/
 │   ├── components/          # Páginas y componentes de la interfaz
-│   │   └── admin/           # Vistas de administración
-│   └── service/             # Servicios que llaman a la API
+│   │   └── admin/           # Panel de administrador y vendedor
+│   ├── service/             # Servicios que llaman a la API
+│   │   └── authFetch.js     # Agrega el token JWT a cada llamada
+│   ├── utils/
+│   │   └── roles.js         # Qué secciones ve cada rol
+│   └── main.jsx             # Activa authFetch al iniciar
 ├── index.html
 ├── package.json             # Dependencias y comandos de npm
 ├── package-lock.json        # Versiones de dependencias instalables
@@ -307,7 +333,7 @@ La versión nueva agrupa sus endpoints en `/api/v1`, por ejemplo:
 - `/api/v1/pedidos` — pedidos y proceso de pago simulado.
 - `/api/v1/productos/imagen` — imágenes de productos.
 
-Estos endpoints están descritos en Swagger. Para las solicitudes con escritura o datos privados se aplican reglas de seguridad en el backend (se deben verificar en la versión del repositorio que se esté ejecutando). El sistema usa **sesiones**; la implementación de **JWT** se considera un trabajo posterior y no se debe anunciar como terminada.
+Estos endpoints están descritos en Swagger. Las solicitudes con escritura o datos privados exigen un **token JWT** con el rol adecuado (ADMIN, VENDEDOR o CLIENTE): sin token el backend responde 401, y con un rol sin permiso responde 403. El detalle está en `docs/SEGURIDAD.md` del repositorio backend.
 
 ## 10. Cómo comprobar que todo está funcionando
 
@@ -318,7 +344,8 @@ Después de iniciar ambos proyectos:
 3. Probar los filtros de categorías.
 4. Iniciar sesión como administrador con `admin@duoc.cl` y la contraseña configurada durante el primer inicio.
 5. Probar el registro de un cliente y un pedido de ejemplo si es necesario.
-6. Comprobar en Workbench, usando la conexión **Tienda Perfumes**, que los datos se guardan en la base local.
+6. Crear un vendedor desde **Usuarios** e iniciar sesión con él: debe ver solo **Órdenes** y **Productos**.
+7. Comprobar en Workbench, usando la conexión **Tienda Perfumes**, que los datos se guardan en la base local.
 
 En Workbench, algunas consultas útiles son:
 
