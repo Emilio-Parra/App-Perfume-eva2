@@ -31,7 +31,22 @@ function App() {
   const [productoSeleccionado, setProductoSeleccionado] = useState(null);
   const [blogSeleccionado, setBlogSeleccionado] = useState(null); // id del artículo abierto en Blog
   // Página visible: inicio | catalogo | ofertas | nosotros | blog | carrito | checkout | compra-exitosa | pago-fallido | tiendas | contacto | login | registro
-  const [paginaActual, setPaginaActual] = useState('inicio');
+  
+  const [paginaActual, setPaginaActual] = useState(() => {
+    try {
+      const sesionGuardada = localStorage.getItem('usuario_actual');
+      const usuario = sesionGuardada
+        ? JSON.parse(sesionGuardada)
+        : null;
+
+      // Administrador y vendedor vuelven a su panel.
+      // Los clientes y visitantes comienzan en la tienda.
+      return usaPanel(usuario) ? 'admin' : 'inicio';
+    } catch {
+      return 'inicio';
+    }
+  });
+
 
   // Filtros del catálogo (viven aquí para no perderse al abrir un detalle y volver)
   const [filtroCategoria, setFiltroCategoria] = useState('todas');
@@ -246,6 +261,7 @@ function App() {
   if (paginaActual === 'admin' && accesoPanel) {
     return (
       <AdminPage
+        productosCargados={productos}
         usuarioActual={usuarioActual}
         onUsuarioActualizado={handleUsuarioActualizado}
         onProductosCambiados={recargarProductos}

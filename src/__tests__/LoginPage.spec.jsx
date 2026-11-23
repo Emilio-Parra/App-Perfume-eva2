@@ -1,49 +1,159 @@
-import { render, screen, fireEvent, cleanup } from '@testing-library/react';
+
+import {
+  render,
+  screen,
+  fireEvent,
+  cleanup,
+  act,
+} from '@testing-library/react';
+
 import { LoginPage } from '../components/LoginPage';
 
-const usuario = { correo: 'ana@duoc.cl', pass: 'abcd', nombre: 'Ana' };
-
-const escribir = (correo, pass) => {
-  fireEvent.change(screen.getByLabelText(/correo electrónico/i), { target: { value: correo } });
-  fireEvent.change(screen.getByLabelText(/contraseña/i), { target: { value: pass } });
-  fireEvent.click(screen.getByRole('button', { name: /iniciar sesión/i }));
+const usuarioBackend = {
+  id: 7,
+  correo: 'ana@duoc.cl',
+  nombre: 'Ana',
+  apellido: 'Prueba',
+  rol: 'cliente',
+  token: 'jwt-falso-para-pruebas',
+  refreshToken: 'refresh-falso-para-pruebas',
 };
 
-describe('components/LoginPage', () => {
+const escribir = (correo, pass) => {
+  fireEvent.change(
+    screen.getByLabelText(/correo electrónico/i),
+    { target: { value: correo } }
+  );
+
+  fireEvent.change(
+    screen.getByLabelText(/contraseña/i),
+    { target: { value: pass } }
+  );
+
+  fireEvent.click(
+    screen.getByRole('button', { name: /iniciar sesión/i })
+  );
+};
+
+describe('components/LoginPage - autenticación con Spring Boot', () => {
+  let fetchOriginal;
+
   beforeEach(() => {
-    localStorage.clear();
-    localStorage.setItem('usuarios_perfumes', JSON.stringify([usuario]));
+    fetchOriginal = window.fetch;
+    localStorage.removeItem('usuario_actual');
+    window.fetch = jasmine.createSpy('fetch');
   });
-  afterEach(cleanup);
+
+  afterEach(() => {
+    cleanup();
+    window.fetch = fetchOriginal;
+    localStorage.removeItem('usuario_actual');
+  });
 
   it('muestra error si el correo no tiene un dominio permitido', () => {
     render(<LoginPage />);
+
     escribir('ana@hotmail.com', 'abcd');
-    expect(screen.getByText(/solo se permiten correos/i)).toBeTruthy();
+
+    expect(
+      screen.getByText(/solo se permiten correos/i)
+    ).toBeTruthy();
+
+    expect(window.fetch).not.toHaveBeenCalled();
   });
 
   it('muestra error si la contraseña tiene menos de 4 caracteres', () => {
     render(<LoginPage />);
+
     escribir('ana@duoc.cl', 'ab');
-    expect(screen.getByText(/entre 4 y 10 caracteres/i)).toBeTruthy();
+
+    expect(
+      screen.getByText(/entre 4 y 10 caracteres/i)
+    ).toBeTruthy();
+
+    expect(window.fetch).not.toHaveBeenCalled();
   });
 
-  it('muestra error general si las credenciales no coinciden', () => {
+  it('muestra error si las credenciales no coinciden', async () => {
+    window.fetch.and.resolveTo({
+      ok: false,
+      status: 401,
+      json: async () => ({
+        error: 'Correo o contraseña incorrectos.',
+      }),
+    });
+
     render(<LoginPage />);
+
     escribir('ana@duoc.cl', 'clavemala');
-    expect(screen.getByText(/correo o contraseña incorrectos/i)).toBeTruthy();
+
+    expect(
+      await screen.findByText(/correo o contraseña incorrectos/i)
+    ).toBeTruthy();
+
+    expect(window.fetch).toHaveBeenCalledWith(
+      '/api/usuarios/login',
+      jasmine.objectContaining({
+        method: 'POST',
+      })
+    );
+
+    expect(localStorage.getItem('usuario_actual')).toBeNull();
   });
 
-  it('con credenciales correctas guarda la sesión y avisa el éxito', () => {
-    jasmine.clock().install();
-    const onLoginSuccess = jasmine.createSpy('onLoginSuccess');
-    render(<LoginPage onLoginSuccess={onLoginSuccess} />);
-    escribir('ana@duoc.cl', 'abcd');
+  it('con credenciales correctas guarda JWT y mantiene la sesión', async () => {
+    window.fetch.and.resolveTo({
+      ok: true,
+      status: 200,
+      json: async () => usuarioBackend,
+    });
 
-    expect(screen.getByText(/sesión iniciada con éxito/i)).toBeTruthy();
-    expect(JSON.parse(localStorage.getItem('usuario_actual')).correo).toBe('ana@duoc.cl');
-    jasmine.clock().tick(1200);
-    expect(onLoginSuccess).toHaveBeenCalledOnceWith(usuario);
-    jasmine.clock().uninstall();
+    const onLoginSuccess = jasmine.createSpy('onLoginSuccess');
+
+    jasmine.clock().install();
+
+    try {
+      render(
+        <LoginPage onLoginSuccess={onLoginSuccess} />
+      );
+
+      await act(async () => {
+        escribir('ana@duoc.cl', 'abcd');
+      });
+
+      expect(
+        screen.getByText(/sesión iniciada con éxito/i)
+      ).toBeTruthy();
+
+      const sesionGuardada = JSON.parse(
+        localStorage.getItem('usuario_actual') || 'null'
+      );
+
+      expect(sesionGuardada).toEqual(
+        jasmine.objectContaining({
+          id: 7,
+          correo: 'ana@duoc.cl',
+          rol: 'cliente',
+          token: 'jwt-falso-para-pruebas',
+          refreshToken: 'refresh-falso-para-pruebas',
+        })
+      );
+
+      expect(window.fetch).toHaveBeenCalledWith(
+        '/api/usuarios/login',
+        jasmine.objectContaining({
+          method: 'POST',
+        })
+      );
+
+      // Simular los 1200 ms de espera del login.
+      jasmine.clock().tick(1201);
+
+      expect(onLoginSuccess).toHaveBeenCalledOnceWith(
+        usuarioBackend
+      );
+    } finally {
+      jasmine.clock().uninstall();
+    }
   });
 });

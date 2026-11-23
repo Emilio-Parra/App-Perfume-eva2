@@ -15,7 +15,14 @@ import { esAdmin, esVendedor, puedeVerVista, vistaInicial } from '../../utils/ro
 
 // Contenedor del panel de administración. Las categorías y pedidos se consultan
 // desde Spring Boot; los demás servicios conservan sus funciones actuales.
-export function AdminPage({ usuarioActual, onUsuarioActualizado, onProductosCambiados, onIrATienda, onCerrarSesion }) {
+export function AdminPage({
+  productosCargados,
+  usuarioActual,
+  onUsuarioActualizado,
+  onProductosCambiados,
+  onIrATienda,
+  onCerrarSesion
+}) {
   // El vendedor parte en Órdenes; el administrador en el Dashboard
   const [ruta, setRuta] = useState(() => ({ vista: vistaInicial(usuarioActual), param: null, volver: null }));
   const soloLectura = esVendedor(usuarioActual);
@@ -25,6 +32,17 @@ export function AdminPage({ usuarioActual, onUsuarioActualizado, onProductosCamb
     usuarios: obtenerUsuarios(),
     pedidos: obtenerPedidos(),
   }));
+
+
+  // Sincronizar los productos del panel con los cargados desde MySQL.
+  // Esto evita que la lista quede vacía cuando se presiona F5.
+  useEffect(() => {
+    setDatos((anterior) => ({
+      ...anterior,
+      productos: productosCargados
+    }));
+  }, [productosCargados]);
+
   const [errorUsuario, setErrorUsuario] = useState('');
   const [cargandoUsuarios, setCargandoUsuarios] = useState(true);
   const [errorListadoUsuarios, setErrorListadoUsuarios] = useState('');
