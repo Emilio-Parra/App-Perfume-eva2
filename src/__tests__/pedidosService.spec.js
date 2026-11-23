@@ -136,7 +136,7 @@ describe('service/pedidosService - Spring Boot y MySQL', () => {
     expect(obtenerPedido(101)).not.toBeNull();
 
     expect(window.fetch).toHaveBeenCalledWith(
-      '/api/pedidos',
+      '/api/v1/pedidos',
       jasmine.objectContaining({
         method: 'POST',
       })
@@ -206,7 +206,7 @@ describe('service/pedidosService - Spring Boot y MySQL', () => {
     expect(obtenerPedido(pedido.id).estado).toBe('pagado');
 
     expect(window.fetch).toHaveBeenCalledWith(
-      '/api/pedidos/101/pago',
+      '/api/v1/pedidos/101/pago',
       jasmine.objectContaining({
         method: 'POST',
       })

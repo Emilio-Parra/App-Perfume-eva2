@@ -1,6 +1,6 @@
 // Usuarios del administrador (clientes y vendedores): datos en MySQL por Spring Boot.
 // El backend solo acepta los roles 'cliente' o 'vendedor' desde el panel.
-const API = '/api/admin/usuarios';
+const API = '/api/v1/admin/usuarios';
 let usuariosCache = [];
 
 const validar = async (respuesta) => {

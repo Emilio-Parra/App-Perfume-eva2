@@ -68,7 +68,7 @@ describe('service/usuariosService - Spring Boot y MySQL', () => {
     expect(resultado[1].rol).toBe('vendedor');
 
     expect(window.fetch).toHaveBeenCalledWith(
-      '/api/admin/usuarios'
+      '/api/v1/admin/usuarios'
     );
   });
 
@@ -93,7 +93,7 @@ describe('service/usuariosService - Spring Boot y MySQL', () => {
 
     const llamada = window.fetch.calls.mostRecent();
 
-    expect(llamada.args[0]).toBe('/api/admin/usuarios');
+    expect(llamada.args[0]).toBe('/api/v1/admin/usuarios');
     expect(llamada.args[1].method).toBe('POST');
 
     const cuerpo = JSON.parse(llamada.args[1].body);
@@ -132,7 +132,7 @@ describe('service/usuariosService - Spring Boot y MySQL', () => {
     const llamada = window.fetch.calls.mostRecent();
 
     expect(llamada.args[0]).toBe(
-      '/api/admin/usuarios/ana%40duoc.cl'
+      '/api/v1/admin/usuarios/ana%40duoc.cl'
     );
     expect(llamada.args[1].method).toBe('PUT');
   });
@@ -159,7 +159,7 @@ describe('service/usuariosService - Spring Boot y MySQL', () => {
     const llamada = window.fetch.calls.mostRecent();
 
     expect(llamada.args[0]).toBe(
-      '/api/admin/usuarios/ana%40duoc.cl'
+      '/api/v1/admin/usuarios/ana%40duoc.cl'
     );
     expect(llamada.args[1].method).toBe('DELETE');
   });

@@ -92,7 +92,7 @@ describe('components/LoginPage - autenticación con Spring Boot', () => {
     ).toBeTruthy();
 
     expect(window.fetch).toHaveBeenCalledWith(
-      '/api/usuarios/login',
+      '/api/v1/usuarios/login',
       jasmine.objectContaining({
         method: 'POST',
       })
@@ -140,7 +140,7 @@ describe('components/LoginPage - autenticación con Spring Boot', () => {
       );
 
       expect(window.fetch).toHaveBeenCalledWith(
-        '/api/usuarios/login',
+        '/api/v1/usuarios/login',
         jasmine.objectContaining({
           method: 'POST',
         })

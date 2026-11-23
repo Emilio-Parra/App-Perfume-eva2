@@ -99,7 +99,7 @@ export function AdminPage({
       setErrorPedidos('');
 
       try {
-        const respuesta = await fetch('/api/pedidos/admin');
+        const respuesta = await fetch('/api/v1/pedidos/admin');
         if (!respuesta.ok) {
           throw new Error(`Error HTTP ${respuesta.status}`);
         }
@@ -261,7 +261,7 @@ export function AdminPage({
       ...(cambios.pass ? { pass: cambios.pass } : {}),
     };
 
-    const respuesta = await fetch('/api/admin/perfil', {
+    const respuesta = await fetch('/api/v1/admin/perfil', {
       method: 'PUT',
       credentials: 'same-origin',
       cache: 'no-store',
@@ -279,7 +279,7 @@ export function AdminPage({
     }
 
     // Volver a consultar el backend, evitando respuestas antiguas del navegador.
-    const comprobar = await fetch(`/api/admin/perfil?verificacion=${Date.now()}`, {
+    const comprobar = await fetch(`/api/v1/admin/perfil?verificacion=${Date.now()}`, {
       credentials: 'same-origin',
       cache: 'no-store',
     });

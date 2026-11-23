@@ -42,7 +42,7 @@ const solicitarAPI = async (ruta, opciones = {}) => {
 
 // Cargar productos desde Spring Boot y MySQL
 export const cargarProductos = async () => {
-  const productos = await solicitarAPI('/api/productos');
+  const productos = await solicitarAPI('/api/v1/productos');
 
   if (!Array.isArray(productos)) {
     throw new Error('El backend no devolvió una lista de productos');
@@ -71,7 +71,7 @@ export const crearProducto = async (datos) => {
   // El ID lo genera MySQL
   delete nuevo.id;
 
-  const creado = await solicitarAPI('/api/productos', {
+  const creado = await solicitarAPI('/api/v1/productos', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json; charset=utf-8',
@@ -101,7 +101,7 @@ export const actualizarProducto = async (id, cambios) => {
     stock: Number(cambios.stock ?? actual.stock),
   };
 
-  const guardado = await solicitarAPI(`/api/productos/${id}`, {
+  const guardado = await solicitarAPI(`/api/v1/productos/${id}`, {
     method: 'PUT',
     headers: {
       'Content-Type': 'application/json; charset=utf-8',
@@ -121,7 +121,7 @@ export const actualizarProducto = async (id, cambios) => {
 
 // Eliminar un producto directamente de MySQL
 export const eliminarProducto = async (id) => {
-  await solicitarAPI(`/api/productos/${id}`, {
+  await solicitarAPI(`/api/v1/productos/${id}`, {
     method: 'DELETE',
   });
 

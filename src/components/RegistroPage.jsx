@@ -191,7 +191,7 @@ export function RegistroPage({ onIrALogin }) {
     setRegistrando(true);
 
     try {
-      const respuesta = await fetch('/api/usuarios/registro', {
+      const respuesta = await fetch('/api/v1/usuarios/registro', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json; charset=utf-8'

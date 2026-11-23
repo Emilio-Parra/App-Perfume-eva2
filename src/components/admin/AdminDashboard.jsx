@@ -22,7 +22,7 @@ export function AdminDashboard({ productos, pedidos, usuarios, onIr, onIrATienda
 
     const cargarTotalClientes = async () => {
       try {
-        const respuesta = await fetch('/api/usuarios/total-clientes');
+        const respuesta = await fetch('/api/v1/usuarios/total-clientes');
         if (!respuesta.ok) throw new Error(`HTTP ${respuesta.status}`);
 
         const datos = await respuesta.json();

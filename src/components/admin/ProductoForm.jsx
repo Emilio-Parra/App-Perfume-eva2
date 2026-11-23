@@ -86,7 +86,7 @@ export function ProductoForm({ inicial, categorias, onGuardar, onCancelar }) {
       if (archivo) {
         const formulario = new FormData();
         formulario.append('archivo', archivo);
-        const respuesta = await fetch('/api/productos/imagen', {
+        const respuesta = await fetch('/api/v1/productos/imagen', {
           method: 'POST',
           credentials: 'same-origin',
           body: formulario

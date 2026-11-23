@@ -15,7 +15,7 @@ export function AdminPerfil({ usuario, onGuardar }) {
     let activo = true;
     const cargar = async () => {
       try {
-        const respuesta = await fetch('/api/admin/perfil', { credentials: 'same-origin' });
+        const respuesta = await fetch('/api/v1/admin/perfil', { credentials: 'same-origin' });
         const perfil = await respuesta.json().catch(() => null);
         if (!respuesta.ok) throw new Error(perfil?.error || `Error HTTP ${respuesta.status}`);
         if (activo) {

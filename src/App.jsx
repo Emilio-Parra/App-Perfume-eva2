@@ -31,7 +31,7 @@ function App() {
   const [productoSeleccionado, setProductoSeleccionado] = useState(null);
   const [blogSeleccionado, setBlogSeleccionado] = useState(null); // id del artículo abierto en Blog
   // Página visible: inicio | catalogo | ofertas | nosotros | blog | carrito | checkout | compra-exitosa | pago-fallido | tiendas | contacto | login | registro
-  
+
   const [paginaActual, setPaginaActual] = useState(() => {
     try {
       const sesionGuardada = localStorage.getItem('usuario_actual');
@@ -130,32 +130,44 @@ function App() {
 
   // Cerrar sesión: con JWT basta con borrar el token guardado en el navegador.
   // Igual se avisa al backend para mantener el registro del cierre.
-  const handleCerrarSesion = async () => {
-    if (usuarioActual) {
-      const rutaLogout = usuarioActual.rol === 'admin'
-        ? '/api/admin/logout'
-        : '/api/usuarios/logout';
 
-      try {
-        const respuesta = await fetch(rutaLogout, {
-          method: 'POST'
-        });
+  // Cerrar la sesión local aunque el backend no responda.
+  const handleCerrarSesion = () => {
+    const usuario = usuarioActual;
+    const token = usuario?.token;
 
-        // Si la sesión expiró en el servidor, también se puede limpiar React.
-        if (!respuesta.ok && respuesta.status !== 401) {
-          throw new Error(`HTTP ${respuesta.status}`);
-        }
-      } catch (error) {
-        console.error('No se pudo cerrar la sesión en el backend:', error);
-        window.alert('No se pudo confirmar el cierre de sesión con el servidor. Inténtalo nuevamente.');
-        return;
-      }
-    }
-
+    // Eliminar la autenticación y los datos temporales.
     localStorage.removeItem('usuario_actual');
+    localStorage.removeItem('carrito_perfumes');
+
+    // Actualizar inmediatamente la interfaz.
     setUsuarioActual(null);
+    setCarrito([]);
+    setPedidoActual(null);
+    setProductoSeleccionado(null);
+    setBlogSeleccionado(null);
     setPaginaActual('inicio');
+
+    // Notificar al backend sin bloquear el cierre local.
+    if (usuario) {
+      const rutaLogout = usuario.rol === 'admin'
+        ? '/api/v1/admin/logout'
+        : '/api/v1/usuarios/logout';
+
+      fetch(rutaLogout, {
+        method: 'POST',
+        headers: token
+          ? { Authorization: `Bearer ${token}` }
+          : {}
+      }).catch((error) => {
+        console.warn(
+          'La sesión local se cerró, pero el servidor no respondió:',
+          error
+        );
+      });
+    }
   };
+
 
   const handleAgregarAlCarrito = (producto) => {
     setCarrito((prev) => {

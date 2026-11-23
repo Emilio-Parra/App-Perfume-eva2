@@ -75,7 +75,7 @@ export const crearPedido = async ({ cliente, envio, items }) => {
   };
 
   // Crear el pedido directamente en Spring Boot
-  const respuesta = await solicitarAPI('/api/pedidos', {
+  const respuesta = await solicitarAPI('/api/v1/pedidos', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json; charset=utf-8'
@@ -157,7 +157,7 @@ export const procesarPago = async (id) => {
 
   // Spring Boot simula el pago y actualiza MySQL
   const respuesta = await solicitarAPI(
-    `/api/pedidos/${id}/pago`,
+    `/api/v1/pedidos/${id}/pago`,
     {
       method: 'POST'
     }

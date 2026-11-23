@@ -61,8 +61,8 @@ export function LoginPage({ onLoginSuccess, onIrARegistro }) {
       // La cuenta de administrador usa su endpoint separado en MySQL.
       const esAdministrador = emailVal.toLowerCase() === 'admin@duoc.cl';
       const endpoint = esAdministrador
-        ? '/api/admin/login'
-        : '/api/usuarios/login';
+        ? '/api/v1/admin/login'
+        : '/api/v1/usuarios/login';
 
       const respuesta = await fetch(endpoint, {
         method: 'POST',
@@ -103,7 +103,7 @@ export function LoginPage({ onLoginSuccess, onIrARegistro }) {
       let usuarioEncontrado = resultado;
       if (esAdministrador) {
         // La sesión todavía no está guardada: se envía el token recién recibido
-        const respuestaPerfil = await fetch(`/api/admin/perfil?actualizar=${Date.now()}`, {
+        const respuestaPerfil = await fetch(`/api/v1/admin/perfil?actualizar=${Date.now()}`, {
           cache: 'no-store',
           headers: { Authorization: `Bearer ${resultado.token}` }
         });

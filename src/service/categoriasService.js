@@ -1,5 +1,4 @@
-
-const API = '/api/categorias';
+const API = '/api/v1/categorias';
 let categoriasCache = [];
 
 const comprobarRespuesta = async (respuesta) => {
