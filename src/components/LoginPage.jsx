@@ -1,5 +1,6 @@
 
 import React, { useState } from 'react';
+import { GoogleLoginButton } from './GoogleLoginButton';
 
 export function LoginPage({ onLoginSuccess, onIrARegistro }) {
   const [correo, setCorreo] = useState('');
@@ -142,6 +143,39 @@ export function LoginPage({ onLoginSuccess, onIrARegistro }) {
     }
   };
 
+  // Autenticacion Google: se comprueba en Spring Boot y se emiten nuestros JWT.
+  const handleGoogleCredential = async (credential) => {
+    if (iniciandoSesion) return;
+    setErrors({});
+    setMensajeExito(false);
+    setIniciandoSesion(true);
+    try {
+      const respuesta = await fetch('/api/v1/auth/google', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ credential }),
+      });
+      const resultado = await respuesta.json().catch(() => null);
+      if (!respuesta.ok) {
+        setErrors({ general: resultado?.error || 'No se pudo iniciar sesión con Google.' });
+        return;
+      }
+      if (!resultado?.id || !resultado?.token ||
+          !['cliente', 'vendedor'].includes(resultado.rol)) {
+        setErrors({ general: 'El backend no devolvió una cuenta válida.' });
+        return;
+      }
+      localStorage.setItem('usuario_actual', JSON.stringify(resultado));
+      setMensajeExito(true);
+      onLoginSuccess?.(resultado);
+    } catch (error) {
+      console.error('Error al iniciar sesión con Google:', error);
+      setErrors({ general: 'No se pudo conectar con Spring Boot para verificar Google.' });
+    } finally {
+      setIniciandoSesion(false);
+    }
+  };
+
   return (
     <main
       className="container my-5 d-flex justify-content-center align-items-center"
@@ -264,6 +298,13 @@ export function LoginPage({ onLoginSuccess, onIrARegistro }) {
           </div>
 
         </form>
+
+        <div className="mt-3 text-center">
+          <GoogleLoginButton
+            onCredential={handleGoogleCredential}
+            onError={(mensaje) => setErrors({ general: mensaje })}
+          />
+        </div>
       </div>
     </main>
   );
